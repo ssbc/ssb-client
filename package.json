@@ -1,0 +1,27 @@
+{
+  "name": "ssb-client",
+  "version": "1.0.0",
+  "description": "scuttlebot client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ssbc/ssb-client.git"
+  },
+  "dependencies": {
+    "muxrpc": "~3.3.1",
+    "pull-serializer": "~0.3.2",
+    "secure-scuttlebutt": "~9.0.1",
+    "ssb-channel": "~1.0.2",
+    "ssb-keys": "~0.4.1",
+    "ssb-manifest": "~1.0.0"
+  },
+  "author": "Paul Frazee <pfrazee@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ssbc/ssb-client/issues"
+  },
+  "homepage": "https://github.com/ssbc/ssb-client"
+}
