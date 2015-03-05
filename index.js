@@ -7,7 +7,7 @@ var ssbKeys    = require('ssb-keys')
 var manifest   = require('ssb-manifest')
 var createMsg  = require('secure-scuttlebutt/message')(require('secure-scuttlebutt/defaults'))
 
-module.exports = function (keys, addr, cb) {
+module.exports = function (keys, addr, readyCb) {
   var client = muxrpc(manifest, false, serialize)()
   client.keys = keys
 
@@ -26,21 +26,25 @@ module.exports = function (keys, addr, cb) {
     rpcStream = client.createStream()
     pull(wsStream, rpcStream, wsStream)
 
+    var onopen_ = wsStream.socket.onopen
     wsStream.socket.onopen = function() {
+      onopen_()
       client._emit('connect')
 
-      client.auth(function (err) {
+      client.auth(function (err, authed) {
         if (err)
           client._emit('error', err)
         else
-          client._emit('authed')
-        cb && cb(err)
+          client._emit('authed', authed)
+        cb && cb(err, authed)
       })
     }
 
+    var onclose_ = wsStream.socket.onclose
     wsStream.socket.onclose = function() {
-      rpcStream.close(new Error('broken link'), function(){})
-      client._emit('error', new Error('Close'))
+      onclose_ && onclose_()
+      rpcStream.close(function(){})
+      client._emit('close')
     }
   }
 
@@ -62,22 +66,36 @@ module.exports = function (keys, addr, cb) {
   }
 
   client.publish = function (content, cb) {
-    rpc.getLatest(function (err, prev) {
-      var msg = createMsg(client.keys, null, content, prev||null)
-      rpc.add(msg, cb)
+    client.getLatest(client.keys.id, function (err, prev) {
+      if (!prev) {
+        var init = createMsg(client.keys, null, { type: 'init', public: client.keys.public }, null)
+        client.add(init, function (err, res) {
+          if (err)
+            return cb(err)
+          prev = res.value
+          next()
+        })
+      } else
+        next()
+
+      function next () {
+        var msg = createMsg(client.keys, null, content, prev||null)
+        client.add(msg, cb)
+      }
     })
   }
 
+  var auth_ = client.auth
   client.auth = function (cb) {
     var authReq = ssbKeys.signObj(client.keys, {
       role: 'client',
       ts: Date.now(),
       public: client.keys.public
     })
-    rpc.auth(authReq, cb)
+    auth_.call(client, authReq, cb)
   }
 
-  client.connect(addr, cb)
+  client.connect(addr, readyCb)
   return client
 }
 

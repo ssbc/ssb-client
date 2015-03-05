@@ -21,8 +21,11 @@ client.on('authed', function () {
   console.log('authed and ready to go')
 })
 client.on('error', function (err) {
-  // connection lost
-  console.log('connection or authentication error', err)
+  console.log('authentication error', err)
+  client.reconnect({ wait: 5000 })
+})
+client.on('close', function (err) {
+  console.log('connection closed')
   client.reconnect({ wait: 5000 })
 })
 client.on('reconnecting', function () {
