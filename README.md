@@ -11,15 +11,14 @@ var ssbclient = require('ssb-client')
 var keys = ssbkeys.generate()
 
 // connect to the local scuttlebot
-var client = ssbclient(keys, 'localhost')
+var client = ssbclient(keys, 'localhost', doWork)
 
 // listen to connection events
 client.on('connect', function () {
   console.log('connection established, authenticating...')
 })
 client.on('authed', function () {
-  console.log('ready to go')
-  doWork()
+  console.log('authed and ready to go')
 })
 client.on('error', function (err) {
   // connection lost
@@ -32,8 +31,9 @@ client.on('reconnecting', function () {
 
 // make calls to the scuttlebot api
 function doWork() {
+  // authed and ready to go
   pull(client.createFeedStream(), pull.drain(console.log))
-  client.add({ type: 'post', text: 'hello, world!' }, console.log)
+  client.publish({ type: 'post', text: 'hello, world!' }, console.log)
 }
 ```
 

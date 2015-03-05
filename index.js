@@ -1,56 +1,86 @@
+var pull       = require('pull-stream')
 var muxrpc     = require('muxrpc')
+var address    = require('ssb-address')
+var ws         = require('pull-ws-server')
 var Serializer = require('pull-serializer')
-var chan       = require('ssb-channel')
 var ssbKeys    = require('ssb-keys')
 var manifest   = require('ssb-manifest')
 var createMsg  = require('secure-scuttlebutt/message')(require('secure-scuttlebutt/defaults'))
 
-module.exports = function (keys, address) {
-  var rpc    = muxrpc(manifest, false, serialize)()
-  var client = chan.connect(ssb, address)
+module.exports = function (keys, addr, cb) {
+  var client = muxrpc(manifest, false, serialize)()
   client.keys = keys
 
-  copyApi(manifest, rpc, client)
+  var wsStream
+  var rpcStream
 
-  client.add = function (content, cb) {
+  client.connect = function(addr, cb) {
+    addr = address(addr)
+    if (wsStream) {
+      wsStream.socket.close()
+      client._emit('reconnecting')
+    }
+
+    client.addr = addr
+    wsStream = ws.connect(addr)
+    rpcStream = client.createStream()
+    pull(wsStream, rpcStream, wsStream)
+
+    wsStream.socket.onopen = function() {
+      client._emit('connect')
+
+      client.auth(function (err) {
+        if (err)
+          client._emit('error', err)
+        else
+          client._emit('authed')
+        cb && cb(err)
+      })
+    }
+
+    wsStream.socket.onclose = function() {
+      rpcStream.close(new Error('broken link'), function(){})
+      client._emit('error', new Error('Close'))
+    }
+  }
+
+  client.close = function(cb) {
+    wsStream.socket.close()
+    rpcStream.close(function () {
+      cb && cb()
+    })
+  }
+
+  client.reconnect = function(opts) {
+    opts = opts || {}
+    client.close(function() {
+      if (opts.wait)
+        setTimeout(client.connect.bind(client, client.addr), opts.wait)
+      else
+        client.connect(client.addr)
+    })
+  }
+
+  client.publish = function (content, cb) {
     // :TODO: get prev
     var prev = null
-    var msg = createMsg(keys, null, content, prev)
+    var msg = createMsg(client.keys, null, content, prev)
     rpc.add(msg, cb)
   }
 
   client.auth = function (cb) {
-    var authReq = ssbKeys.signObj(keys, {
+    var authReq = ssbKeys.signObj(client.keys, {
       role: 'client',
       ts: Date.now(),
-      public: keys.public
+      public: client.keys.public
     })
     rpc.auth(authReq, cb)
   }
 
-  client.on('connect', function () {
-    client.auth(function (err) {
-      if (err)
-        client.emit('error', err)
-      else
-        client.emit('authed')
-    })
-  })
-
+  client.connect(addr, cb)
   return client
 }
 
 function serialize (stream) {
   return Serializer(stream, JSON, {split: '\n\n'})
-}
-
-function copyApi (manifest, src, dst) {
-  for (var k in manifest) {
-    if (typeof manifest[k] == 'object') {
-      dst[k] = {}
-      copyApi(manifest[k], src[k], dst[k])
-    } else {
-      dst[k] = src[k]
-    }
-  }
 }

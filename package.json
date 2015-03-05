@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "muxrpc": "~3.3.1",
+    "pull-stream": "~2.26.0",
     "pull-serializer": "~0.3.2",
+    "pull-ws-server": "~1.1.2",
     "secure-scuttlebutt": "~9.0.1",
-    "ssb-channel": "~1.0.2",
+    "ssb-address": "~1.0.0",
     "ssb-keys": "~0.4.1",
     "ssb-manifest": "~1.0.0"
   },
