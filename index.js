@@ -62,10 +62,10 @@ module.exports = function (keys, addr, cb) {
   }
 
   client.publish = function (content, cb) {
-    // :TODO: get prev
-    var prev = null
-    var msg = createMsg(client.keys, null, content, prev)
-    rpc.add(msg, cb)
+    rpc.getLatest(function (err, prev) {
+      var msg = createMsg(client.keys, null, content, prev||null)
+      rpc.add(msg, cb)
+    })
   }
 
   client.auth = function (cb) {
