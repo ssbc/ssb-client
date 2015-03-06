@@ -15,8 +15,7 @@ function abortIf (err) {
 }
 
 var client = Client(keys, config)
-  .connect(abortIf)
-  .auth(abortIf)
+  .connect(abortIf) //auth is automatic
 
 client.publish({
   type: 'post', text: 'hello, world!'
