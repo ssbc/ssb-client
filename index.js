@@ -27,41 +27,47 @@ module.exports = function (keys, config, readyCb) {
 
     addr = address(config || addr)
     if (wsStream) {
-      wsStream.socket.close()
+      wsStream.close()
       client._emit('reconnecting')
     }
 
+    var called = false
+
     client.addr = addr
-    wsStream = ws.connect(addr)
+
+    //if auth is not the first method called,
+    //then the other methods will get auth errors.
+    //since rpc calls are queued, we can just do it here.
+    client.auth(function (err, authed) {
+      if (err)
+        client._emit('error', err)
+      else
+        client._emit('authed', authed)
+      if(called) return
+      called = true; cb && cb(err, authed)
+    })
+
+    wsStream = ws.connect(addr, {
+      onOpen: function() {
+        client._emit('connect')
+        //cb is called after auth, just above
+      },
+      onClose: function() {
+        client._emit('close')
+        //rpcStream will detect close on it's own.
+        if(called) return
+        called = true; cb && cb(err, authed)
+      }
+    })
+
     rpcStream = client.createStream()
     pull(wsStream, rpcStream, wsStream)
-
-    var onopen_ = wsStream.socket.onopen
-    wsStream.socket.onopen = function() {
-      onopen_()
-      client._emit('connect')
-
-      client.auth(function (err, authed) {
-        if (err)
-          client._emit('error', err)
-        else
-          client._emit('authed', authed)
-        cb && cb(err, authed)
-      })
-    }
-
-    var onclose_ = wsStream.socket.onclose
-    wsStream.socket.onclose = function() {
-      onclose_ && onclose_()
-      rpcStream.close(function(){})
-      client._emit('close')
-    }
 
     return client
   }
 
   client.close = function(cb) {
-    wsStream.socket.close()
+    wsStream.close()
     rpcStream.close(function () {
       cb && cb()
     })
