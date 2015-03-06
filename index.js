@@ -11,7 +11,11 @@ function isFunction (f) {
   return 'function' === typeof f
 }
 
-module.exports = function (keys, config, readyCb) {
+function throwIfError(err) {
+  if(err) throw err
+}
+
+module.exports = function (keys, config) {
   var manifest
   //if we are in the browser
   config.host = config.host || 'localhost'
@@ -68,9 +72,7 @@ module.exports = function (keys, config, readyCb) {
 
   client.close = function(cb) {
     wsStream.close()
-    rpcStream.close(function () {
-      cb && cb()
-    })
+    rpcStream.close(cb ? cb : throwIfError)
     return client
   }
 
