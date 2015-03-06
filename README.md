@@ -3,41 +3,28 @@
 [scuttlebot](https://github.com/ssbc/scuttlebot) client
 
 ```js
-var pull = require('pull-stream')
-var ssbkeys = require('ssb-keys')
-var ssbclient = require('ssb-client')
 
-// generate a new keypair
-var keys = ssbkeys.generate()
+var Client = require('./')
 
-// connect to the local scuttlebot
-var client = ssbclient(keys, 'localhost', doWork)
+var config  = require('ssb-config')
+var ssbKeys = require('ssb-keys')
+var keys = ssbKeys.loadOrCreateSync(config)
 
-// listen to connection events
-client.on('connect', function () {
-  console.log('connection established, authenticating...')
-})
-client.on('authed', function () {
-  console.log('authed and ready to go')
-})
-client.on('error', function (err) {
-  console.log('authentication error', err)
-  client.reconnect({ wait: 5000 })
-})
-client.on('close', function (err) {
-  console.log('connection closed')
-  client.reconnect({ wait: 5000 })
-})
-client.on('reconnecting', function () {
-  console.log('attempting reconnect...')
-})
-
-// make calls to the scuttlebot api
-function doWork() {
-  // authed and ready to go
-  pull(client.createFeedStream(), pull.drain(console.log))
-  client.publish({ type: 'post', text: 'hello, world!' }, console.log)
+function abortIf (err) {
+  if(err) throw err
 }
+
+var client = Client(keys, config)
+  .connect(abortIf) //auth is automatic
+
+client.publish({
+  type: 'post', text: 'hello, world!'
+}, function (err, msg) {
+  abortIf(err)
+  console.log(msg)
+  client.close()
+})
+
 ```
 
 ## License

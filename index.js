@@ -4,55 +4,76 @@ var address    = require('ssb-address')
 var ws         = require('pull-ws-server')
 var Serializer = require('pull-serializer')
 var ssbKeys    = require('ssb-keys')
-var manifest   = require('ssb-manifest')
+var loadManf   = require('ssb-manifest/load')
 var createMsg  = require('secure-scuttlebutt/message')(require('secure-scuttlebutt/defaults'))
 
-module.exports = function (keys, addr, readyCb) {
-  var client = muxrpc(manifest, false, serialize)()
+function isFunction (f) {
+  return 'function' === typeof f
+}
+
+function throwIfError(err) {
+  if(err) throw err
+}
+
+module.exports = function (keys, config) {
+  var manifest
+  //if we are in the browser
+  config.host = config.host || 'localhost'
+  var client = muxrpc(loadManf(config), false, serialize)()
   client.keys = keys
 
   var wsStream
   var rpcStream
 
   client.connect = function(addr, cb) {
-    addr = address(addr)
+    if(isFunction(addr))
+      cb = addr, addr = null
+
+    addr = address(config || addr)
     if (wsStream) {
-      wsStream.socket.close()
+      wsStream.close()
       client._emit('reconnecting')
     }
 
+    var called = false
+
     client.addr = addr
-    wsStream = ws.connect(addr)
+
+    //if auth is not the first method called,
+    //then the other methods will get auth errors.
+    //since rpc calls are queued, we can just do it here.
+    client.auth(function (err, authed) {
+      if (err)
+        client._emit('error', err)
+      else
+        client._emit('authed', authed)
+      if(called) return
+      called = true; cb && cb(err, authed)
+    })
+
+    wsStream = ws.connect(addr, {
+      onOpen: function() {
+        client._emit('connect')
+        //cb is called after auth, just above
+      },
+      onClose: function() {
+        client._emit('close')
+        //rpcStream will detect close on it's own.
+        if(called) return
+        called = true; cb && cb(err, authed)
+      }
+    })
+
     rpcStream = client.createStream()
     pull(wsStream, rpcStream, wsStream)
 
-    var onopen_ = wsStream.socket.onopen
-    wsStream.socket.onopen = function() {
-      onopen_()
-      client._emit('connect')
-
-      client.auth(function (err, authed) {
-        if (err)
-          client._emit('error', err)
-        else
-          client._emit('authed', authed)
-        cb && cb(err, authed)
-      })
-    }
-
-    var onclose_ = wsStream.socket.onclose
-    wsStream.socket.onclose = function() {
-      onclose_ && onclose_()
-      rpcStream.close(function(){})
-      client._emit('close')
-    }
+    return client
   }
 
   client.close = function(cb) {
-    wsStream.socket.close()
-    rpcStream.close(function () {
-      cb && cb()
-    })
+    wsStream.close()
+    rpcStream.close(cb ? cb : throwIfError)
+    return client
   }
 
   client.reconnect = function(opts) {
@@ -63,6 +84,7 @@ module.exports = function (keys, addr, readyCb) {
       else
         client.connect(client.addr)
     })
+    return client
   }
 
   client.publish = function (content, cb) {
@@ -83,6 +105,7 @@ module.exports = function (keys, addr, readyCb) {
         client.add(msg, cb)
       }
     })
+    return client
   }
 
   var auth_ = client.auth
@@ -93,9 +116,9 @@ module.exports = function (keys, addr, readyCb) {
       public: client.keys.public
     })
     auth_.call(client, authReq, cb)
+    return client
   }
 
-  client.connect(addr, readyCb)
   return client
 }
 
