@@ -11,7 +11,6 @@ function abortIf (err) {
 
 var client = Client(keys, config)
   .connect(abortIf)
-  .auth(abortIf)
 
 client.whoami(function (err, whoami) {
   abortIf(err)
