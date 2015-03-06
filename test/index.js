@@ -11,12 +11,12 @@ tape('test api', function (t) {
 
   var keys = ssbkeys.generate()
   var client = ssbclient(keys)
-  client.connect({ port: 45451, host: 'localhost' }, function (err) {
-    if (err)
-      throw err
-  })
-  client.publish({type: 'post', text: 'hello'}, function (err, data) {
-    if(err) throw err
+  client.connect({ port: 45451, host: 'localhost' }, iferr)
+  client.auth(ssbkeys.createAuth(keys), iferr)
+
+  var feed = client.createFeed(keys)
+  feed.add({type: 'post', text: 'hello'}, function (err, data) {
+    iferr(err)
     t.equal(data.value.content.text, 'hello')
     console.log(data)
     client.close(function() {
@@ -24,4 +24,9 @@ tape('test api', function (t) {
       t.end()
     })
   })
+
+  function iferr (err) {
+    if (err)
+      throw err
+  }
 })
