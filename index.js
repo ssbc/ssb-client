@@ -1,11 +1,12 @@
-var pull       = require('pull-stream')
-var muxrpc     = require('muxrpc')
-var address    = require('ssb-address')
-var ws         = require('pull-ws-server')
-var Serializer = require('pull-serializer')
-var ssbKeys    = require('ssb-keys')
-var loadManf   = require('ssb-manifest/load')
-var createMsg  = require('secure-scuttlebutt/message')(require('secure-scuttlebutt/defaults'))
+var pull        = require('pull-stream')
+var muxrpc      = require('muxrpc')
+var address     = require('ssb-address')
+var ws          = require('pull-ws-server')
+var Serializer  = require('pull-serializer')
+var ssbKeys     = require('ssb-keys')
+var loadManf    = require('ssb-manifest/load')
+var ssbFeed     = require('secure-scuttlebutt/feed')
+var ssbDefaults = require('secure-scuttlebutt/defaults')
 
 function isFunction (f) {
   return 'function' === typeof f
@@ -37,37 +38,24 @@ module.exports = function (keys, config) {
       cb = addr, addr = null
 
     addr = address(addr || config)
+    client.addr = addr
     if (wsStream) {
       wsStream.close()
       client._emit('reconnecting')
     }
 
     var called = false
-
-    client.addr = addr
-
-    //if auth is not the first method called,
-    //then the other methods will get auth errors.
-    //since rpc calls are queued, we can just do it here.
-    client.auth(function (err, authed) {
-      if (err)
-        client._emit('error', err)
-      else
-        client._emit('authed', authed)
-      if(called) return
-      called = true; cb && cb(err, authed)
-    })
-
     wsStream = ws.connect(addr, {
       onOpen: function() {
         client._emit('connect')
-        //cb is called after auth, just above
+        if(called) return
+        called = true; cb && cb()
       },
       onClose: function() {
         client._emit('close')
         //rpcStream will detect close on it's own.
         if(called) return
-        called = true; cb && cb(err, authed)
+        called = true; cb && cb()
       }
     })
 
@@ -94,36 +82,8 @@ module.exports = function (keys, config) {
     return client
   }
 
-  client.publish = function (content, cb) {
-    client.getLatest(client.keys.id, function (err, prev) {
-      if (!prev) {
-        var init = createMsg(client.keys, null, { type: 'init', public: client.keys.public }, null)
-        client.add(init, function (err, res) {
-          if (err)
-            return cb(err)
-          prev = res.value
-          next()
-        })
-      } else
-        next()
-
-      function next () {
-        var msg = createMsg(client.keys, null, content, prev||null)
-        client.add(msg, cb)
-      }
-    })
-    return client
-  }
-
-  var auth_ = client.auth
-  client.auth = function (cb) {
-    var authReq = ssbKeys.signObj(client.keys, {
-      role: 'client',
-      ts: Date.now(),
-      public: client.keys.public
-    })
-    auth_.call(client, authReq, cb)
-    return client
+  client.createFeed = function (keys) {
+    return ssbFeed(this, keys, ssbDefaults)
   }
 
   return client
