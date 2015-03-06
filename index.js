@@ -4,18 +4,28 @@ var address    = require('ssb-address')
 var ws         = require('pull-ws-server')
 var Serializer = require('pull-serializer')
 var ssbKeys    = require('ssb-keys')
-var manifest   = require('ssb-manifest')
+var loadManf   = require('ssb-manifest/load')
 var createMsg  = require('secure-scuttlebutt/message')(require('secure-scuttlebutt/defaults'))
 
-module.exports = function (keys, addr, readyCb) {
-  var client = muxrpc(manifest, false, serialize)()
+function isFunction (f) {
+  return 'function' === typeof f
+}
+
+module.exports = function (keys, config, readyCb) {
+  var manifest
+  //if we are in the browser
+  config.host = config.host || 'localhost'
+  var client = muxrpc(loadManf(config), false, serialize)()
   client.keys = keys
 
   var wsStream
   var rpcStream
 
   client.connect = function(addr, cb) {
-    addr = address(addr)
+    if(isFunction(addr))
+      cb = addr, addr = null
+
+    addr = address(config || addr)
     if (wsStream) {
       wsStream.socket.close()
       client._emit('reconnecting')
@@ -46,6 +56,8 @@ module.exports = function (keys, addr, readyCb) {
       rpcStream.close(function(){})
       client._emit('close')
     }
+
+    return client
   }
 
   client.close = function(cb) {
@@ -53,6 +65,7 @@ module.exports = function (keys, addr, readyCb) {
     rpcStream.close(function () {
       cb && cb()
     })
+    return client
   }
 
   client.reconnect = function(opts) {
@@ -63,6 +76,7 @@ module.exports = function (keys, addr, readyCb) {
       else
         client.connect(client.addr)
     })
+    return client
   }
 
   client.publish = function (content, cb) {
@@ -83,6 +97,7 @@ module.exports = function (keys, addr, readyCb) {
         client.add(msg, cb)
       }
     })
+    return client
   }
 
   var auth_ = client.auth
@@ -93,9 +108,9 @@ module.exports = function (keys, addr, readyCb) {
       public: client.keys.public
     })
     auth_.call(client, authReq, cb)
+    return client
   }
 
-  client.connect(addr, readyCb)
   return client
 }
 
