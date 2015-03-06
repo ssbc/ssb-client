@@ -4,26 +4,37 @@
 
 ```js
 
-var Client = require('./')
-
-var config  = require('ssb-config')
+var Client = require('ssb-client')
 var ssbKeys = require('ssb-keys')
-var keys = ssbKeys.loadOrCreateSync(config)
 
-function abortIf (err) {
-  if(err) throw err
+// desktop app:
+var keys = ssbKeys.loadOrCreateSync('./app-private.key')
+
+// web app:
+var keys
+try {
+  keys = JSON.parse(localStorage.keys)
+} catch (e) {
+  keys = ssbKeys.generate()
+  localStorage.keys = JSON.stringify(keys)
 }
 
 var client = Client(keys, config)
-  .connect(abortIf) //auth is automatic
+  .connect(abortIf)
+  .auth(ssbKeys.createAuth(keys), abortIf)
 
-client.publish({
+var feed = client.createFeed(keys)
+feed.add({
   type: 'post', text: 'hello, world!'
 }, function (err, msg) {
   abortIf(err)
   console.log(msg)
   client.close()
 })
+
+function abortIf (err) {
+  if(err) throw err
+}
 
 ```
 
