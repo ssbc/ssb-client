@@ -18,6 +18,7 @@ function throwIfError(err) {
 module.exports = function (keys, config) {
   var manifest
   //if we are in the browser
+  config = config || {}
   config.host = config.host || 'localhost'
   var client = muxrpc(loadManf(config), false, serialize)()
   client.keys = keys
@@ -29,7 +30,7 @@ module.exports = function (keys, config) {
     if(isFunction(addr))
       cb = addr, addr = null
 
-    addr = address(config || addr)
+    addr = address(addr || config)
     if (wsStream) {
       wsStream.close()
       client._emit('reconnecting')
