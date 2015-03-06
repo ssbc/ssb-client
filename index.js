@@ -20,7 +20,13 @@ module.exports = function (keys, config) {
   //if we are in the browser
   config = config || {}
   config.host = config.host || 'localhost'
-  var client = muxrpc(loadManf(config), false, serialize)()
+  
+  var client = muxrpc(loadManf(config), { auth: 'async' }, serialize)({
+    auth: function (req, cb) {
+      // just pass-through. you're authed!
+      cb()
+    }
+  })
   client.keys = keys
 
   var wsStream
