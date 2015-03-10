@@ -5,24 +5,26 @@
 ```js
 
 var Client = require('ssb-client')
-var ssbKeys = require('ssb-keys')
+var Keys = require('ssb-keys')
 
 // desktop app:
-var keys = ssbKeys.loadOrCreateSync('./app-private.key')
+var keys = Keys.loadOrCreateSync('./app-private.key')
 
 // web app:
 var keys
 try {
   keys = JSON.parse(localStorage.keys)
 } catch (e) {
-  keys = ssbKeys.generate()
+  keys = Keys.generate()
   localStorage.keys = JSON.stringify(keys)
 }
 
+// connect:
 var client = Client(keys, config)
   .connect(abortIf)
-  .auth(ssbKeys.createAuth(keys), abortIf)
+  .auth(Keys.createAuth(keys), abortIf)
 
+// post to feed:
 var feed = client.createFeed(keys)
 feed.add({
   type: 'post', text: 'hello, world!'
