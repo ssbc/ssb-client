@@ -24,7 +24,11 @@ module.exports = function (keys, config) {
   
   var client = muxrpc(loadManf(config), { auth: 'async' }, serialize)({
     auth: function (req, cb) {
-      // just pass-through. you're authed!
+      // when this connects to a server, the server auths
+      // back to see who this is. we don't have any apis
+      // for the server to call (yet) so this doesn't do anything.
+      // however, if we don't just let this go through, the server
+      // log shows a nasty error log.
       cb()
     }
   })
