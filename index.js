@@ -6,6 +6,7 @@ var Serializer  = require('pull-serializer')
 var loadManf    = require('ssb-manifest/load')
 var ssbFeed     = require('secure-scuttlebutt/feed')
 var ssbDefaults = require('secure-scuttlebutt/defaults')
+var explain     = require('explain-error')
 
 function isFunction (f) {
   return 'function' === typeof f
@@ -84,8 +85,68 @@ module.exports = function (config) {
     return client
   }
 
-  client.createFeed = function (keys) {
-    return ssbFeed(this, keys, ssbDefaults)
+  client.createFeed = function (keys, feedInfo, cb) {
+    if (!cb && typeof feedInfo == 'function') {
+      cb = feedInfo
+      feedInfo = null
+    }
+
+    var feed = ssbFeed(this, keys, ssbDefaults)
+    if (feedInfo) {
+      cb = cb || throwIfErr
+
+      // get user id
+      var this_ = this
+      this.whoami(function (err, userinfo) {
+        if (err || !userinfo)
+          cb(explain(err, 'Scuttlebot failed to answer whoami, which is a sign that it\'s in a bad state'))
+
+        // get any contact info published from me about me and user
+        getContact(this_, feed.id, feed.id, function (err, me) {
+          err && console.error(err)
+          gotContacts(me)
+        })
+        getContact(this_, feed.id, userinfo.id, function (err, user) {
+          err && console.error(err)
+          gotContacts(null, user)
+        })
+
+        var me, user
+        function gotContacts(me_, user_) {
+          me = me || me_
+          user = user || user_
+          if (!user || !me)
+            return
+
+          // create profile messages as needed
+          if (!user.alias || user.role != 'user') {
+            feed.add({
+              type: 'contact',
+              contact: { feed: userinfo.id },
+              alias: true,
+              role: 'user'
+            }, done)
+          } else done()
+          if (me.name != feedInfo.name || me.role != 'app') {
+            feed.add({
+              type: 'contact',
+              contact: { feed: feed.id },
+              name: feedInfo.name,
+              role: 'app'
+            }, done)            
+          } else done()
+        }
+        var msgs = []
+        function done (err, msg) {
+          if (err) return cb(err)
+          msgs.push(msg)
+          if (msgs.length === 2)
+            cb(null, msgs.filter(Boolean))
+        }
+      })
+    } else
+      cb && cb()
+    return feed
   }
 
   return client
@@ -93,4 +154,33 @@ module.exports = function (config) {
 
 function serialize (stream) {
   return Serializer(stream, JSON, {split: '\n\n'})
+}
+
+function throwIfErr (err) {
+  if (err)
+    throw err
+}
+
+function getContact (ssb, author, target, cb) {
+  var contact = {}
+  pull(
+    ssb.feedsLinkedToFeed({ id: target, rel: 'contact' }),
+    pull.asyncMap(function (entry, cb) {
+      if (entry.source == author)
+        ssb.get(entry.message, cb)
+      else
+        cb()
+    }),
+    pull.drain(
+      function (msg) {
+        for (var k in msg.content)
+          contact[k] = msg.content[k]
+      },
+      function (err) {
+        if (err)
+          return cb(err)
+        cb(null, contact)
+      }
+    )
+  )
 }

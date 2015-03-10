@@ -24,8 +24,17 @@ var client = SSBClient({ host: 'localhost' })
   .connect(abortIf)
   .auth(SSBKeys.createAuth(keys), abortIf)
 
+// create and configure feed:
+var feed = client.createFeed(keys, { name: 'My Application' }, function (err, msgs) {
+  if (msgs.length > 0) {
+    // ssb-client published new 'contact' messages for the feed
+    console.log(msgs)
+  } else {
+    // feed's information was already published on the feed
+  }
+})
+
 // post to feed:
-var feed = client.createFeed(keys)
 feed.add({
   type: 'post', text: 'hello, world!'
 }, function (err, msg) {
