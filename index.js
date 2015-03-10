@@ -3,7 +3,6 @@ var muxrpc      = require('muxrpc')
 var address     = require('ssb-address')
 var ws          = require('pull-ws-server')
 var Serializer  = require('pull-serializer')
-var ssbKeys     = require('ssb-keys')
 var loadManf    = require('ssb-manifest/load')
 var ssbFeed     = require('secure-scuttlebutt/feed')
 var ssbDefaults = require('secure-scuttlebutt/defaults')
@@ -16,7 +15,7 @@ function throwIfError(err) {
   if(err) throw err
 }
 
-module.exports = function (keys, config) {
+module.exports = function (config) {
   var manifest
   //if we are in the browser
   config = config || {}
@@ -32,7 +31,6 @@ module.exports = function (keys, config) {
       cb()
     }
   })
-  client.keys = keys
 
   var wsStream
   var rpcStream
