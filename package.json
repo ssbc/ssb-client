@@ -26,6 +26,7 @@
     "level-sublevel": "~6.4.6",
     "memdown": "~1.0.0",
     "scuttlebot": "~3.0.0",
+    "ssb-msg-schemas": "~2.0.0",
     "tape": "~2.12.3"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",

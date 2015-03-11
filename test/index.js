@@ -1,5 +1,6 @@
 var scuttlebot = require('scuttlebot')
 var ssbkeys = require('ssb-keys')
+var schemas = require('ssb-msg-schemas')
 var tape = require('tape')
 var ssbclient = require('../index')
 
@@ -37,6 +38,41 @@ tape('add messages', function (t) {
     env.client.close(function() {
       env.server.close()
       t.end()
+    })
+  })
+})
+
+
+tape('setup aliases', function (t) {
+
+  var env = setupTest()
+  var feed = env.client.createFeed(env.keys)
+
+  env.client.whoami(function (err, user) {
+    iferr(err)
+    console.log('user', user)
+
+    schemas.getContact(env.client, { by: feed.id, for: user.id }, function (err, contact) {
+      iferr(err)
+      console.log('contact', contact)
+      t.equal(Object.keys(contact).length, 0)
+
+      schemas.addContact(feed, user.id, { alias: true, role: 'user' }, function (err, msg) {
+        iferr(err)
+        console.log('added msg', msg)
+
+        schemas.getContact(env.client, { by: feed.id, for: user.id }, function (err, contact) {
+          iferr(err)
+          console.log('contact', contact)
+          t.equal(contact.alias, true)
+          t.equal(contact.role, 'user')
+
+          env.client.close(function() {
+            env.server.close()
+            t.end()
+          })
+        })
+      })
     })
   })
 })
