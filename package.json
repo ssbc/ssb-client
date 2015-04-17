@@ -28,7 +28,7 @@
     "scuttlebot": "~4.0.0",
     "ssb-msg-schemas": "~3.1.0",
     "tape": "~2.12.3",
-    "ssb-feed": "~0.0.1"
+    "secure-scuttlebutt": "~10.1.0"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
   "license": "MIT",
