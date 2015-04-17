@@ -43,7 +43,7 @@ tape('add messages', function (t) {
 })
 
 
-tape('setup aliases', function (t) {
+/*tape('setup aliases', function (t) {
 
   var env = setupTest()
   var feed = env.client.createFeed(env.keys)
@@ -57,15 +57,14 @@ tape('setup aliases', function (t) {
       console.log('contact', contact)
       t.equal(Object.keys(contact).length, 0)
 
-      schemas.addContact(feed, user.id, { alias: true, role: 'user' }, function (err, msg) {
+      schemas.addContact(feed, user.id, { myuser: true }, function (err, msg) {
         iferr(err)
         console.log('added msg', msg)
 
         schemas.getContact(env.client, { by: feed.id, for: user.id }, function (err, contact) {
           iferr(err)
           console.log('contact', contact)
-          t.equal(contact.alias, true)
-          t.equal(contact.role, 'user')
+          t.equal(contact.user, true)
 
           env.client.close(function() {
             env.server.close()
@@ -75,4 +74,4 @@ tape('setup aliases', function (t) {
       })
     })
   })
-})
+})*/
