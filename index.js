@@ -4,7 +4,7 @@ var address     = require('ssb-address')
 var ws          = require('pull-ws-server')
 var Serializer  = require('pull-serializer')
 var loadManf    = require('ssb-manifest/load')
-var ssbFeed     = require('secure-scuttlebutt/feed')
+var ssbFeed     = require('ssb-feed')
 var ssbDefaults = require('secure-scuttlebutt/defaults')
 
 function isFunction (f) {
