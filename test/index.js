@@ -1,18 +1,24 @@
 var scuttlebot = require('scuttlebot')
-var ssbkeys = require('ssb-keys')
+var createFeed = require('ssb-feed')
+var ssbKeys = require('ssb-keys')
+var ssbkeys = ssbKeys
 var schemas = require('ssb-msg-schemas')
 var tape = require('tape')
 var ssbclient = require('../index')
 
 function setupTest () {
   var db = require('level-sublevel/bytewise')(require('levelup')('/testdb', { db: require('memdown'), keyEncoding: 'json', valueEncoding: 'json' }))
-  var ssb = require('secure-scuttlebutt')(db, require('secure-scuttlebutt/defaults'))
-  var server = scuttlebot({ port: 45451, host: 'localhost' }, ssb, ssb.createFeed()).use(require('scuttlebot/plugins/logging'))
+  var ssb = require('secure-scuttlebutt')(db, ssbKeys)
+  var keys = ssbKeys.generate()
+  var server = scuttlebot(
+    { port: 45451, host: 'localhost' },
+    ssb,
+    createFeed(ssb, keys, ssbKeys)
+  ).use(require('scuttlebot/plugins/logging'))
 
-  var keys = ssbkeys.generate()
   var client = ssbclient({ port: 45451, host: 'localhost' })
   client.connect(iferr)
-  client.auth(ssbkeys.createAuth(keys), iferr)
+  client.auth(ssbKeys.createAuth(keys), iferr)
 
   return {
     server: server,
@@ -29,7 +35,7 @@ function iferr (err) {
 tape('add messages', function (t) {
 
   var env = setupTest()
-  var feed = env.client.createFeed(env.keys)
+  var feed = createFeed(env.client, env.keys, ssbKeys)
 
   feed.add({type: 'post', text: 'hello'}, function (err, data) {
     iferr(err)
@@ -42,11 +48,10 @@ tape('add messages', function (t) {
   })
 })
 
-
 tape('setup aliases', function (t) {
 
   var env = setupTest()
-  var feed = env.client.createFeed(env.keys)
+  var feed = createFeed(env.client, env.keys, ssbKeys)
 
   env.client.whoami(function (err, user) {
     iferr(err)
@@ -57,15 +62,14 @@ tape('setup aliases', function (t) {
       console.log('contact', contact)
       t.equal(Object.keys(contact).length, 0)
 
-      schemas.addContact(feed, user.id, { alias: true, role: 'user' }, function (err, msg) {
+      schemas.addContact(feed, user.id, { alias: 'user' }, function (err, msg) {
         iferr(err)
         console.log('added msg', msg)
 
         schemas.getContact(env.client, { by: feed.id, for: user.id }, function (err, contact) {
           iferr(err)
           console.log('contact', contact)
-          t.equal(contact.alias, true)
-          t.equal(contact.role, 'user')
+          t.equal(contact.alias, 'user')
 
           env.client.close(function() {
             env.server.close()
@@ -76,3 +80,4 @@ tape('setup aliases', function (t) {
     })
   })
 })
+

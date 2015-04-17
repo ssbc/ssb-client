@@ -4,8 +4,8 @@ var address     = require('ssb-address')
 var ws          = require('pull-ws-server')
 var Serializer  = require('pull-serializer')
 var loadManf    = require('ssb-manifest/load')
-var ssbFeed     = require('secure-scuttlebutt/feed')
-var ssbDefaults = require('secure-scuttlebutt/defaults')
+var createFeed  = require('ssb-feed')
+var ssbKeys     = require('ssb-keys')
 
 function isFunction (f) {
   return 'function' === typeof f
@@ -85,7 +85,7 @@ module.exports = function (config) {
   }
 
   client.createFeed = function (keys) {
-    return ssbFeed(this, keys, ssbDefaults)
+    return createFeed(this, keys, ssbKeys)
   }
 
   return client
