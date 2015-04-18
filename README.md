@@ -20,9 +20,8 @@ try {
 }
 
 // connect:
-var client = SSBClient({ host: 'localhost' })
-  .connect(abortIf)
-  .auth(SSBKeys.createAuth(keys), abortIf)
+var client = SSBClient()
+client.connect({ host: 'localhost' }, SSBKeys.createAuth(keys), abortIf)
 
 // post to feed:
 var feed = client.createFeed(keys)

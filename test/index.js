@@ -17,8 +17,7 @@ function setupTest () {
   ).use(require('scuttlebot/plugins/logging'))
 
   var client = ssbclient({ port: 45451, host: 'localhost' })
-  client.connect(iferr)
-  client.auth(ssbKeys.createAuth(keys), iferr)
+  client.connect(ssbKeys.createAuth(keys), iferr)
 
   return {
     server: server,

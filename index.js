@@ -35,9 +35,17 @@ module.exports = function (config) {
   var wsStream
   var rpcStream
 
-  client.connect = function(addr, cb) {
-    if(isFunction(addr))
-      cb = addr, addr = null
+  client.connect = function(addr, auth, cb) {
+    if (isFunction(addr))
+      cb = addr, addr = null, auth = null
+    if (isFunction(auth)) {
+      cb = auth
+      auth = null
+      if (addr.signature && addr.role) {
+        auth = addr
+        addr = null
+      }
+    }    
 
     addr = address(addr || config)
     client.addr = addr
@@ -63,6 +71,12 @@ module.exports = function (config) {
 
     rpcStream = client.createStream()
     pull(wsStream, rpcStream, wsStream)
+
+    if (auth) {
+      var authcb = cb
+      cb = null
+      client.auth(auth, authcb)
+    }
 
     return client
   }
