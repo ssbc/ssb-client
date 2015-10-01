@@ -1,42 +1,28 @@
-# ssb-client v1
+# ssb-client v2
 
-[scuttlebot](https://github.com/ssbc/scuttlebot) client
+[Scuttlebot](https://github.com/ssbc/scuttlebot) client. 
 
 ```js
+var ssbClient = require('ssb-client')
 
-var SSBClient = require('ssb-client')
-var SSBKeys = require('ssb-keys')
-
-// desktop app:
-var keys = SSBKeys.loadOrCreateSync('./app-private.key')
-
-// web app:
-var keys
-try {
-  keys = JSON.parse(localStorage.keys)
-} catch (e) {
-  keys = SSBKeys.generate()
-  localStorage.keys = JSON.stringify(keys)
-}
-
-// connect:
-var client = SSBClient({ host: 'localhost' })
-  .connect(abortIf)
-  .auth(SSBKeys.createAuth(keys), abortIf)
-
-// post to feed:
-var feed = client.createFeed(keys)
-feed.add({
-  type: 'post', text: 'hello, world!'
-}, function (err, msg) {
-  abortIf(err)
-  console.log(msg)
-  client.close()
+// simplest usage, connect to localhost sbot
+ssbClient(function (err, sbot) {
+  // ...
 })
 
-function abortIf (err) {
-  if(err) throw err
-}
+// configuration:
+var keys = ssbKeys.loadOrCreateSync('./app-private.key')
+ssbClient(
+  keys,                // optional, defaults to ~/.ssb/secret
+  {
+    host: 'localhost', // optional, defaults to localhost
+    port: 8008,        // optional, defaults to 8008
+    key: keys.id       // optional, defaults to keys.id
+  },
+  function (err, sbot) {
+    // ...
+  }
+)
 
 ```
 

@@ -1,96 +1,35 @@
-var pull        = require('pull-stream')
-var muxrpc      = require('muxrpc')
-var address     = require('ssb-address')
-var ws          = require('pull-ws-server')
-var Serializer  = require('pull-serializer')
-var loadManf    = require('ssb-manifest/load')
-var createFeed  = require('ssb-feed')
-var ssbKeys     = require('ssb-keys')
+var path    = require('path')
+var ssbKeys = require('ssb-keys')
+var config  = require('ssb-config')
 
-function isFunction (f) {
-  return 'function' === typeof f
-}
+var createSbot = require('scuttlebot')
+  .use(require('scuttlebot/plugins/master'))
+  .use(require('scuttlebot/plugins/gossip'))
+  .use(require('scuttlebot/plugins/friends'))
+  .use(require('scuttlebot/plugins/replicate'))
+  .use(require('scuttlebot/plugins/blobs'))
+  .use(require('scuttlebot/plugins/invite'))
+  .use(require('scuttlebot/plugins/block'))
+  .use(require('scuttlebot/plugins/local'))
+  .use(require('scuttlebot/plugins/logging'))
+  .use(require('scuttlebot/plugins/private'))
 
-function throwIfError(err) {
-  if(err) throw err
-}
-
-module.exports = function (config) {
-  var manifest
-  //if we are in the browser
-  config = config || {}
-  config.host = config.host || 'localhost'
-  
-  var client = muxrpc(loadManf(config), { auth: 'async' }, serialize)({
-    auth: function (req, cb) {
-      // when this connects to a server, the server auths
-      // back to see who this is. we don't have any apis
-      // for the server to call (yet) so this doesn't do anything.
-      // however, if we don't just let this go through, the server
-      // log shows a nasty error log.
-      cb()
-    }
-  })
-
-  var wsStream
-  var rpcStream
-
-  client.connect = function(addr, cb) {
-    if(isFunction(addr))
-      cb = addr, addr = null
-
-    addr = address(addr || config)
-    client.addr = addr
-    if (wsStream) {
-      wsStream.close()
-      client._emit('reconnecting')
-    }
-
-    var called = false
-    wsStream = ws.connect(addr, {
-      onOpen: function() {
-        client._emit('connect')
-        if(called) return
-        called = true; cb && cb()
-      },
-      onClose: function() {
-        client._emit('close')
-        //rpcStream will detect close on it's own.
-        if(called) return
-        called = true; cb && cb()
-      }
-    })
-
-    rpcStream = client.createStream()
-    pull(wsStream, rpcStream, wsStream)
-
-    return client
+module.exports = function (keys, opts, cb) {
+  if (typeof keys == 'function') {
+    cb = keys
+    keys = null
+    opts = null
+  }
+  if (typeof opts == 'function') {
+    cb = opts
+    opts = null
   }
 
-  client.close = function(cb) {
-    wsStream.close()
-    rpcStream.close(cb ? cb : throwIfError)
-    return client
-  }
+  keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
+  opts = opts || {}
+  opts.host = opts.host || 'localhost'
+  opts.port = opts.port || config.port
+  opts.key  = opts.key  || keys.id
 
-  client.reconnect = function(opts) {
-    opts = opts || {}
-    client.close(function() {
-      if (opts.wait)
-        setTimeout(client.connect.bind(client, client.addr), opts.wait)
-      else
-        client.connect(client.addr)
-    })
-    return client
-  }
-
-  client.createFeed = function (keys) {
-    return createFeed(this, keys, ssbKeys)
-  }
-
-  return client
-}
-
-function serialize (stream) {
-  return Serializer(stream, JSON, {split: '\n\n'})
+  createSbot.createClient({keys: keys})(opts, cb)
 }
