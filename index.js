@@ -1,8 +1,11 @@
-var path    = require('path')
-var ssbKeys = require('ssb-keys')
-var config  = require('ssb-config')
+var path        = require('path')
+var ssbKeys     = require('ssb-keys')
+var config      = require('ssb-config')
 var SecretStack = require('secret-stack')
-var explain = require('explain-error')
+var explain     = require('explain-error')
+var path        = require('path')
+var fs          = require('fs')
+
 var cap =
   new Buffer('1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=', 'base64')
 
@@ -36,5 +39,8 @@ module.exports = function (keys, opts, cb) {
     }
   })()
 
-  createNode.createClient({keys: keys, manifest: manifest})(opts, cb)
+  createNode.createClient({keys: keys, manifest: manifest})(opts, function (err, sbot) {
+    if(err) err = explain(err, 'could not connect to sbot')
+    cb(err, sbot)
+  })
 }
