@@ -11,11 +11,13 @@
     "url": "https://github.com/ssbc/ssb-client.git"
   },
   "dependencies": {
-    "scuttlebot": "^7.3.2",
+    "explain-error": "^1.0.1",
+    "secret-stack": "^2.1.0",
     "ssb-config": "^1.1.0",
     "ssb-keys": "^4.0.3"
   },
   "devDependencies": {
+    "scuttlebot": "^7.3.4",
     "tape": "^4.2.0"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
