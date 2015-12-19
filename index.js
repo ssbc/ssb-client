@@ -1,25 +1,18 @@
 var path    = require('path')
 var ssbKeys = require('ssb-keys')
 var config  = require('ssb-config')
+var SecretStack = require('secret-stack')
+var explain = require('explain-error')
+var cap =
+  new Buffer('1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=', 'base64')
 
-var createSbot = require('scuttlebot')
-  .use(require('scuttlebot/plugins/master'))
-  .use(require('scuttlebot/plugins/gossip'))
-  .use(require('scuttlebot/plugins/friends'))
-  .use(require('scuttlebot/plugins/replicate'))
-  .use(require('scuttlebot/plugins/blobs'))
-  .use(require('scuttlebot/plugins/invite'))
-  .use(require('scuttlebot/plugins/block'))
-  .use(require('scuttlebot/plugins/local'))
-  .use(require('scuttlebot/plugins/logging'))
-  .use(require('scuttlebot/plugins/private'))
 
 module.exports = function (keys, opts, cb) {
   if (typeof keys == 'function') {
     cb = keys
     keys = null
     opts = null
-  }
+  }  
   if (typeof opts == 'function') {
     cb = opts
     opts = null
@@ -31,5 +24,17 @@ module.exports = function (keys, opts, cb) {
   opts.port = opts.port || config.port
   opts.key  = opts.key  || keys.id
 
-  createSbot.createClient({keys: keys})(opts, cb)
+  var createNode = SecretStack({appKey: cap})
+
+  var manifest = opts.manifest || (function () {
+    try {
+      return JSON.parse(fs.readFileSync(
+        path.join(config.path, 'manifest.json')
+      ))
+    } catch (err) {
+      throw explain(err, 'could not load manifest file')
+    }
+  })()
+
+  createNode.createClient({keys: keys, manifest: manifest})(opts, cb)
 }
