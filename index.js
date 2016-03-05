@@ -27,7 +27,7 @@ module.exports = function (keys, opts, cb) {
   opts.port = opts.port || config.port
   opts.key  = opts.key  || keys.id
 
-  var createNode = SecretStack({appKey: cap})
+  var createNode = SecretStack({appKey: config.appKey || cap})
 
   var manifest = opts.manifest || (function () {
     try {
