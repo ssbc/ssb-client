@@ -1,6 +1,5 @@
 var path        = require('path')
 var ssbKeys     = require('ssb-keys')
-var config      = require('ssb-config')
 var SecretStack = require('secret-stack')
 var explain     = require('explain-error')
 var path        = require('path')
@@ -9,19 +8,24 @@ var fs          = require('fs')
 var cap =
   new Buffer('1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=', 'base64')
 
+var createConfig = require('ssb-config/inject')
 
 module.exports = function (keys, opts, cb) {
   if (typeof keys == 'function') {
     cb = keys
     keys = null
     opts = null
-  }  
-  if (typeof opts == 'function') {
+  }
+  else if (typeof opts == 'function') {
     cb = opts
-    opts = null
+    opts = keys
+    keys = null
   }
 
-  keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
+  if(typeof opts === 'string')
+    opts = createConfig(opts)
+
+  keys = keys || ssbKeys.loadOrCreateSync(path.join(opts.path, 'secret'))
   opts = opts || {}
   opts.host = opts.host || 'localhost'
   opts.port = opts.port || config.port
@@ -32,7 +36,7 @@ module.exports = function (keys, opts, cb) {
   var manifest = opts.manifest || (function () {
     try {
       return JSON.parse(fs.readFileSync(
-        path.join(config.path, 'manifest.json')
+        path.join(opts.path, 'manifest.json')
       ))
     } catch (err) {
       throw explain(err, 'could not load manifest file')
@@ -44,3 +48,4 @@ module.exports = function (keys, opts, cb) {
     cb(err, sbot)
   })
 }
+
