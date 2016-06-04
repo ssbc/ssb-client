@@ -22,7 +22,7 @@ module.exports = function (keys, opts, cb) {
     keys = null
   }
 
-  if(typeof opts === 'string')
+  if(typeof opts === 'string' || opts == null)
     opts = createConfig(opts)
 
   keys = keys || ssbKeys.loadOrCreateSync(path.join(opts.path, 'secret'))
@@ -48,4 +48,6 @@ module.exports = function (keys, opts, cb) {
     cb(err, sbot)
   })
 }
+
+
 
