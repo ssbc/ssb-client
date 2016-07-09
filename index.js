@@ -1,9 +1,27 @@
+'use strict'
 var path        = require('path')
 var ssbKeys     = require('ssb-keys')
-var SecretStack = require('secret-stack')
 var explain     = require('explain-error')
 var path        = require('path')
 var fs          = require('fs')
+
+var MultiServer = require('multiserver')
+var WS          = require('multiserver/plugins/ws')
+var Net         = require('multiserver/plugins/net')
+var Shs         = require('multiserver/plugins/shs')
+
+var muxrpc      = require('muxrpc')
+var pull        = require('pull-stream')
+
+function toSodiumKeys(keys) {
+  if(!keys || !keys.public) return null
+  return {
+    publicKey:
+      new Buffer(keys.public.replace('.ed25519',''), 'base64'),
+    secretKey:
+      new Buffer(keys.private.replace('.ed25519',''), 'base64'),
+  }
+}
 
 var cap =
   new Buffer('1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=', 'base64')
@@ -11,6 +29,7 @@ var cap =
 var createConfig = require('ssb-config/inject')
 
 module.exports = function (keys, opts, cb) {
+  var config
   if (typeof keys == 'function') {
     cb = keys
     keys = null
@@ -21,33 +40,52 @@ module.exports = function (keys, opts, cb) {
     opts = keys
     keys = null
   }
+  if(typeof opts === 'string' || opts == null || !keys)
+    config = createConfig(typeof opts === 'string' ? opts : null)
 
-  if(typeof opts === 'string' || opts == null)
-    opts = createConfig(opts)
-
-  keys = keys || ssbKeys.loadOrCreateSync(path.join(opts.path, 'secret'))
+  keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
   opts = opts || {}
-  opts.host = opts.host || 'localhost'
-  opts.port = opts.port || config.port
-  opts.key  = opts.key  || keys.id
 
-  var createNode = SecretStack({appKey: cap})
+  var remote
+  if(opts.remote)
+    remote = opts.remote
+  else {
+    var host = opts.host || 'localhost'
+    var port = opts.port || config.port
+    var key = opts.key || keys.id
+
+    remote = 'net:'+host+':'+port+'~shs:'+key.substring(1).replace('.ed25519', '')
+  }
 
   var manifest = opts.manifest || (function () {
     try {
       return JSON.parse(fs.readFileSync(
-        path.join(opts.path, 'manifest.json')
+        path.join(config.path, 'manifest.json')
       ))
     } catch (err) {
       throw explain(err, 'could not load manifest file')
     }
   })()
 
-  createNode.createClient({keys: keys, manifest: manifest})(opts, function (err, sbot) {
-    if(err) err = explain(err, 'could not connect to sbot')
-    cb(err, sbot)
+  var shs = Shs({
+    keys: toSodiumKeys(keys),
+    appKey: opts.appKey || cap,
+
+    //no client auth. we can't receive connections anyway.
+    auth: function (cb) { cb(null, false) },
+    timeout: 1000
+  })
+
+  var ms = MultiServer([
+    [Net({}), shs],
+    [WS({}), shs]
+  ])
+
+  ms.client(remote, function (err, stream) {
+    if(err) return cb(explain(err, 'could not connect to sbot'))
+    var sbot = muxrpc(manifest, false)()
+    pull(stream, sbot.createStream(), stream)
+    cb(null, sbot)
   })
 }
-
-
 
