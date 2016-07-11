@@ -42,7 +42,8 @@ module.exports = function (keys, opts, cb) {
   }
   if(typeof opts === 'string' || opts == null || !keys)
     config = createConfig(typeof opts === 'string' ? opts : null)
-
+  else
+    config = {}
   keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
   opts = opts || {}
 
@@ -51,7 +52,7 @@ module.exports = function (keys, opts, cb) {
     remote = opts.remote
   else {
     var host = opts.host || 'localhost'
-    var port = opts.port || config.port
+    var port = opts.port || config.port || 8008
     var key = opts.key || keys.id
 
     remote = 'net:'+host+':'+port+'~shs:'+key.substring(1).replace('.ed25519', '')
