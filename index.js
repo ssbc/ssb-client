@@ -74,7 +74,7 @@ module.exports = function (keys, opts, cb) {
 
     //no client auth. we can't receive connections anyway.
     auth: function (cb) { cb(null, false) },
-    timeout: 1000
+    timeout: config.timers && config.timers.handshake || 3000
   })
 
   var ms = MultiServer([
