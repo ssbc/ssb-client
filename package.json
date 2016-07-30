@@ -15,7 +15,7 @@
     "multiserver": "^1.0.3",
     "muxrpc": "^6.3.3",
     "ssb-config": "^2.0.0",
-    "ssb-keys": "^5.0.0"
+    "ssb-keys": "^6.0.0"
   },
   "devDependencies": {
     "scuttlebot": "^7.3.4",
