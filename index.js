@@ -85,8 +85,10 @@ module.exports = function (keys, opts, cb) {
   ms.client(remote, function (err, stream) {
     if(err) return cb(explain(err, 'could not connect to sbot'))
     var sbot = muxrpc(manifest, false)()
+    sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
     pull(stream, sbot.createStream(), stream)
     cb(null, sbot)
   })
 }
+
 
