@@ -8,6 +8,7 @@ var fs          = require('fs')
 var MultiServer = require('multiserver')
 var WS          = require('multiserver/plugins/ws')
 var Net         = require('multiserver/plugins/net')
+var Onion       = require('multiserver/plugins/onion')
 var Shs         = require('multiserver/plugins/shs')
 
 var muxrpc      = require('muxrpc')
@@ -79,6 +80,7 @@ module.exports = function (keys, opts, cb) {
 
   var ms = MultiServer([
     [Net({}), shs],
+    [Onion({}), shs],
     [WS({}), shs]
   ])
 
