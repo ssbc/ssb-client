@@ -56,7 +56,10 @@ module.exports = function (keys, opts, cb) {
     var port = opts.port || config.port || 8008
     var key = opts.key || keys.id
 
-    remote = 'net:'+host+':'+port+'~shs:'+key.substring(1).replace('.ed25519', '')
+    var protocol = 'net:'
+    if (host.endsWith(".onion"))
+        protocol = 'onion:'
+    remote = protocol+host+':'+port+'~shs:'+key.substring(1).replace('.ed25519', '')
   }
 
   var manifest = opts.manifest || (function () {
