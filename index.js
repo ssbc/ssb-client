@@ -41,9 +41,10 @@ module.exports = function (keys, opts, cb) {
     keys = null
   }
   if(typeof opts === 'string' || opts == null || !keys)
-    config = createConfig(typeof opts === 'string' ? opts : null)
-  else
-    config = {}
+    config = createConfig((typeof opts === 'string' ? opts : null) || process.env.ssb_appname)
+  else if(opts && 'object' === typeof opts)
+    config = opts
+
   keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
   opts = opts || {}
 
@@ -90,5 +91,4 @@ module.exports = function (keys, opts, cb) {
     cb(null, sbot)
   })
 }
-
 
