@@ -74,7 +74,10 @@ module.exports = function (keys, opts, cb) {
     appKey: opts.appKey || cap,
 
     //no client auth. we can't receive connections anyway.
-    auth: function (cb) { cb(null, false) },
+    auth: function (cb) {
+      cb && cb(null, false)
+      sbot.emit('open', false)
+    },
     timeout: config.timers && config.timers.handshake || 3000
   })
 
@@ -83,12 +86,23 @@ module.exports = function (keys, opts, cb) {
     [WS({}), shs]
   ])
 
-  ms.client(remote, function (err, stream) {
-    if(err) return cb(explain(err, 'could not connect to sbot'))
-    var sbot = muxrpc(manifest, false)()
-    sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
-    pull(stream, sbot.createStream(), stream)
-    cb(null, sbot)
-  })
-}
+  var sbot = muxrpc(manifest, false)()
 
+  ms.client(remote, function (err, stream) {
+    if (err) {
+      err = explain(err, 'could not connect to sbot')
+      if (cb) {
+        cb(err)
+      } else {
+        sbot.emit('error', err)
+      }
+    } else {
+      sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
+      pull(stream, sbot.createStream(), stream)
+      cb && cb(null, sbot)
+      sbot.emit('open', sbot)
+    }
+  })
+
+  return sbot
+}
