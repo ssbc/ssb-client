@@ -24,8 +24,8 @@ function toSodiumKeys(keys) {
   }
 }
 
-var cap =
-  new Buffer('1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=', 'base64')
+//load cap from config instead!
+var cap = '1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s='
 
 var createConfig = require('ssb-config/inject')
 
@@ -48,6 +48,8 @@ module.exports = function (keys, opts, cb) {
 
   keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
   opts = opts || {}
+
+  var appKey = new Buffer((opts.caps && opts.caps.shs) || cap, 'base64')
 
   var remote
   if(opts.remote)
@@ -75,7 +77,7 @@ module.exports = function (keys, opts, cb) {
 
   var shs = Shs({
     keys: toSodiumKeys(keys),
-    appKey: opts.appKey || cap,
+    appKey: opts.appKey || appKey,
 
     //no client auth. we can't receive connections anyway.
     auth: function (cb) { cb(null, false) },
