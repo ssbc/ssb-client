@@ -95,7 +95,7 @@ module.exports = function (keys, opts, cb) {
     var sbot = muxrpc(manifest, false)()
     sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
     pull(stream, sbot.createStream(), stream)
-    cb(null, sbot)
+    cb(null, sbot, config)
   })
 }
 
