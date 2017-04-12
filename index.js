@@ -62,7 +62,9 @@ module.exports = function (keys, opts, cb) {
     var protocol = 'net:'
     if (host.endsWith(".onion"))
         protocol = 'onion:'
-    remote = protocol+host+':'+port+'~shs:'+key.substring(1).replace('.ed25519', '')
+    if (!(typeof localStorage !== 'undefined' && (remote = localStorage.ws_remote)))
+        remote = protocol+host+':'+port
+    remote += '~shs:'+key.substring(1).replace('.ed25519', '')
   }
 
   var manifest = opts.manifest || (function () {
