@@ -1,3 +1,4 @@
+'use strict'
 var pull = require('pull-stream')
 var ssbHash = require('pull-hash/ext/ssb')
 var multicb = require('multicb')

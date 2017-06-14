@@ -14,6 +14,8 @@ var Shs         = require('multiserver/plugins/shs')
 var muxrpc      = require('muxrpc')
 var pull        = require('pull-stream')
 
+var fixBlobsAdd = require('./blobs')
+
 function toSodiumKeys(keys) {
   if(!keys || !keys.public) return null
   return {
@@ -94,6 +96,13 @@ module.exports = function (keys, opts, cb) {
     if(err) return cb(explain(err, 'could not connect to sbot'))
     var sbot = muxrpc(manifest, false)()
     sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
+
+    // fox blobs.add. (see ./blobs.js)
+    if (sbot.blobs && sbot.blobs.add) sbot.blobs.add = fixBlobsAdd(
+      sbot.blobs.add,
+      sbot.blobs.rm
+    )
+
     pull(stream, sbot.createStream(), stream)
     cb(null, sbot, config)
   })
