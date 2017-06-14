@@ -5,7 +5,7 @@ var decorate = require('../blobs.js')
 var data = Buffer.from('Hey')
 var expectedLink = "&WB1DdFcm4O5ikRF4v7OIfD/ildKe63QfDkD5HopwkHo=.sha256"
 
-test('if called with no hash, returns underlying sink and returns hash', function(t) {
+test('if called with no hash, returns underlying sink and calls back with hash', function(t) {
 
   t.plan(4)
 
@@ -28,7 +28,7 @@ test('if called with no hash, returns underlying sink and returns hash', functio
   )
 })
 
-test('if underlying sink errors, returns the error', function(t) {
+test('if underlying sink errors, call back with error', function(t) {
 
   t.plan(2)
 
@@ -76,7 +76,7 @@ test('if called with correct hash, behaves like called with no hash', function(t
   )
 })
 
-test('if called with incorrect hash, errors and removes blob', function(t) {
+test('if called with incorrect hash, error and remove blob', function(t) {
   t.plan(5)
 
   function blobs_add_mock(cb) {
@@ -103,7 +103,7 @@ test('if called with incorrect hash, errors and removes blob', function(t) {
   )
 })
 
-test('if called with incorrect hash and blob removal fails, ignore the error', function(t) {
+test('if called with incorrect hash and blob removal fails, ignore the removal error', function(t) {
   t.plan(5)
 
   function blobs_add_mock(cb) {

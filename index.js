@@ -97,7 +97,7 @@ module.exports = function (keys, opts, cb) {
     var sbot = muxrpc(manifest, false)()
     sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
 
-    // fox blobs.add. (see ./blobs.js)
+    // fix blobs.add. (see ./blobs.js)
     if (sbot.blobs && sbot.blobs.add) sbot.blobs.add = fixBlobsAdd(
       sbot.blobs.add,
       sbot.blobs.rm
