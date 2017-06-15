@@ -7,9 +7,10 @@ var expectedLink = "&WB1DdFcm4O5ikRF4v7OIfD/ildKe63QfDkD5HopwkHo=.sha256"
 
 test('if called with no hash, returns underlying sink and calls back with hash', function(t) {
 
-  t.plan(4)
+  t.plan(5)
 
-  function blobs_add_mock(cb) {
+  function blobs_add_mock(hash, cb) {
+    t.notOk(hash)
     return pull.drain( function(buffer) {
       t.equal(buffer, data)
     }, function(err) {
@@ -34,7 +35,8 @@ test('if underlying sink errors, call back with error', function(t) {
 
   var error = new Error('things are not right')
 
-  function blobs_add_mock(cb) {
+  function blobs_add_mock(hash, cb) {
+    t.notOk(hash)
     return pull(
       pull.asyncMap( function(x, cb) {
         cb(error);
@@ -48,16 +50,16 @@ test('if underlying sink errors, call back with error', function(t) {
     pull.once(data),
     addBlob(function(err, link) {
       t.equal(err, error)
-      t.notOk(link) 
     })
   )
 })
 
 test('if called with correct hash, behaves like called with no hash', function(t) {
 
-  t.plan(4)
+  t.plan(5)
 
-  function blobs_add_mock(cb) {
+  function blobs_add_mock(hash, cb) {
+    t.equal(hash, expectedLink)
     return pull.drain( function(buffer) {
       t.equal(buffer, data)
     }, function(err) {
@@ -76,56 +78,18 @@ test('if called with correct hash, behaves like called with no hash', function(t
   )
 })
 
-test('if called with incorrect hash, error and remove blob', function(t) {
-  t.plan(5)
+test('if called with incorrect hash, callback with error', function(t) {
+  t.plan(1)
 
-  function blobs_add_mock(cb) {
-    return pull.drain( function(buffer) {
-      t.equal(buffer, data, 'sink should receive correct data')
-    }, function(err) {
-      t.equal(err, null, 'sink should not receive an error')
-      cb(err);
-    })
+  function blobs_add_mock(hash, cb) {
+    t.fail('blobs.add should not be called')
   }
 
-  function blobs_rm_mock(link, cb) {
-    t.equal(link, expectedLink, 'should try to remove correct blob')
-    cb(null)
-  }
-
-  var addBlob = decorate(blobs_add_mock, blobs_rm_mock)
+  var addBlob = decorate(blobs_add_mock)
   pull(
     pull.once(data),
     addBlob("invalid link", function(err, link) {
       t.assert(err, 'should error')
-      t.notOk(link, 'should not provide link') 
-    })
-  )
-})
-
-test('if called with incorrect hash and blob removal fails, ignore the removal error', function(t) {
-  t.plan(5)
-
-  function blobs_add_mock(cb) {
-    return pull.drain( function(buffer) {
-      t.equal(buffer, data, 'sink should receive correct data')
-    }, function(err) {
-      t.equal(err, null, 'sink should not receive an error')
-      cb(err);
-    })
-  }
-
-  function blobs_rm_mock(link, cb) {
-    t.equal(link, expectedLink, 'should try to remove correct blob')
-    cb(new Error('rm failed'))
-  }
-
-  var addBlob = decorate(blobs_add_mock, blobs_rm_mock)
-  pull(
-    pull.once(data),
-    addBlob("invalid link", function(err, link) {
-      t.assert(err, 'should error')
-      t.notOk(link, 'should not provide link') 
     })
   )
 })

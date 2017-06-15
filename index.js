@@ -98,10 +98,8 @@ module.exports = function (keys, opts, cb) {
     sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
 
     // fix blobs.add. (see ./blobs.js)
-    if (sbot.blobs && sbot.blobs.add) sbot.blobs.add = fixBlobsAdd(
-      sbot.blobs.add,
-      sbot.blobs.rm
-    )
+    if (sbot.blobs && sbot.blobs.add)
+      sbot.blobs.add = fixBlobsAdd(sbot.blobs.add)
 
     pull(stream, sbot.createStream(), stream)
     cb(null, sbot, config)
