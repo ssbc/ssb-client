@@ -1,6 +1,6 @@
 {
   "name": "ssb-client",
-  "version": "4.4.0",
+  "version": "4.4.1",
   "description": "scuttlebot client",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "pull-hash": "^1.0.0",
     "pull-stream": "^3.6.0",
     "ssb-config": "^2.0.0",
-    "ssb-keys": "^6.0.0"
+    "ssb-keys": "^7.0.9"
   },
   "devDependencies": {
     "scuttlebot": "^7.3.4",
