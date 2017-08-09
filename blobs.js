@@ -3,9 +3,8 @@ var pull = require('pull-stream')
 var ssbHash = require('pull-hash/ext/ssb')
 var multicb = require('multicb')
 
-function isFunction(functionToCheck) {
- var getType = {};
- return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+function isFunction(f) {
+ return 'function' === typeof f
 }
 
 // sbot.blobs.add function decorator
@@ -41,3 +40,4 @@ module.exports = function fixAddBlob(add) {
     return sink
   }
 }
+
