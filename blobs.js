@@ -3,11 +3,16 @@ var pull = require('pull-stream')
 var ssbHash = require('pull-hash/ext/ssb')
 var multicb = require('multicb')
 
+function isFunction(functionToCheck) {
+ var getType = {};
+ return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
 // sbot.blobs.add function decorator
 // that returns a function that complies with the spec at
 // - http://scuttlebot.io/apis/scuttlebot/blobs.html#add-sink
 // - http://scuttlebot.io/docs/advanced/publish-a-file.html
-// 
+//
 // Temporary solution until muxrpc supports sinks that can callback
 // with arguments.
 // See ssb thread for details:
@@ -26,7 +31,10 @@ module.exports = function fixAddBlob(add) {
       pull(
         pull.values(buffers),
         add(hash, function(err) {
-          cb(err, actualHash)
+          if(isFunction(cb))
+          {
+            cb(err, actualHash)
+          }
         })
       )
     })
