@@ -5,18 +5,21 @@ var ssbServer = require('scuttlebot')
 
 var ssbClient = require('../')
 
+var shsCap = 'XMHDXXFGBJvloCk8fOinzPkKMRqyA2/eH+3VyUr6lig='
+
 var keys = ssbKeys.generate()
 var server = ssbServer({
   port: 45451, timeout: 2001,
   temp: 'connect',
   host: 'localhost',
   master: keys.id,
-  keys: keys
+  keys: keys,
+  appKey: shsCap
 })
 
 tape('connect', function (t) {
 
-  ssbClient(keys, { port: 45451, manifest: server.manifest() }, function (err, client) {
+  ssbClient(keys, { port: 45451, manifest: server.manifest(), caps: { shs: shsCap }}, function (err, client) {
     if (err) throw err
 
     client.whoami(function (err, info) {
