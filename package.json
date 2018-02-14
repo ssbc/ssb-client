@@ -17,7 +17,7 @@
     "muxrpc": "^7.0.0",
     "pull-hash": "^1.0.0",
     "pull-stream": "^3.6.0",
-    "ssb-config": "^2.0.0",
+    "ssb-config": "^2.2.0",
     "ssb-keys": "^7.0.13"
   },
   "devDependencies": {
