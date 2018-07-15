@@ -2,7 +2,6 @@
 var path        = require('path')
 var ssbKeys     = require('ssb-keys')
 var explain     = require('explain-error')
-var path        = require('path')
 var fs          = require('fs')
 
 var MultiServer = require('multiserver')
