@@ -10,6 +10,7 @@ var Net         = require('multiserver/plugins/net')
 var Onion       = require('multiserver/plugins/onion')
 var Shs         = require('multiserver/plugins/shs')
 var NoAuth      = require('multiserver/plugins/noauth')
+var UnixSock    = require('multiserver/plugins/unix-socket')
 
 var muxrpc      = require('muxrpc')
 var pull        = require('pull-stream')
@@ -87,6 +88,9 @@ module.exports = function (keys, opts, cb) {
     [Net({}), shs],
     [Onion({}), shs],
     [WS({}), shs],
+    [UnixSock({}), NoAuth({
+      keys: toSodiumKeys(keys)
+    })],
     [Net({}), NoAuth({
       keys: toSodiumKeys(keys)
     })],
