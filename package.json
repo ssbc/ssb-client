@@ -13,7 +13,7 @@
   "dependencies": {
     "explain-error": "^1.0.1",
     "multicb": "^1.2.1",
-    "multiserver": "ssb/multiserver#32e1e1fb893932466f6648eb3d1f3e1c898ecb31",
+    "multiserver": "ssbc/multiserver#32e1e1fb893932466f6648eb3d1f3e1c898ecb31",
     "muxrpc": "^6.4.0",
     "pull-hash": "^1.0.0",
     "pull-stream": "^3.6.0",
