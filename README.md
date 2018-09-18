@@ -8,6 +8,7 @@ Create an rpc connection to an sbot running locally.
 
 ```js
 var ssbClient = require('ssb-client')
+var ssbKeys = require('ssb-keys')
 
 // simplest usage, connect to localhost sbot
 // this will cb with an error if an sbot server is not running
