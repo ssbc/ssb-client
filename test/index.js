@@ -17,6 +17,8 @@ var server = ssbServer({
   appKey: shsCap
 })
 
+// ssbServer() is sync function but does not actually guarantee to have a working server instance when it retruns :(
+setTimeout( function() { 
 tape('connect', function (t) {
 
   ssbClient(keys, { port: 45451, manifest: server.manifest(), caps: { shs: shsCap }}, function (err, client) {
@@ -33,5 +35,5 @@ tape('connect', function (t) {
       process.exit(0)
     })
   })
-
 })
+}, 10)
