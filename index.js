@@ -21,9 +21,9 @@ function toSodiumKeys(keys) {
   if(!keys || !keys.public) return null
   return {
     publicKey:
-      new Buffer(keys.public.replace('.ed25519',''), 'base64'),
+      Buffer.from(keys.public.replace('.ed25519',''), 'base64'),
     secretKey:
-      new Buffer(keys.private.replace('.ed25519',''), 'base64'),
+      Buffer.from(keys.private.replace('.ed25519',''), 'base64'),
   }
 }
 
@@ -49,7 +49,7 @@ module.exports = function (keys, opts, cb) {
   keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
   opts = opts || {}
 
-  var appKey = new Buffer(config.caps.shs, 'base64')
+  var appKey = Buffer.from(config.caps.shs, 'base64')
 
   var remote
   if(opts.remote)
