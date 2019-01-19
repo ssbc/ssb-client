@@ -6,3 +6,5 @@ program
   .command('whoami', 'Print the ID of the current user')
   .command('publish', 'Publish a message to your feed')
   .parse(process.argv)
+
+if (!program.args.length) program.help()

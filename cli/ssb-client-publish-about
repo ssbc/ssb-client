@@ -9,6 +9,10 @@ program
   .option('--image <hash>', 'Set your profile image. See "blob add" to add the image, get the hash')
   .parse(process.argv)
 
+if (program.rawArgs.length <= 2) {
+  program.help()
+}
+
 Connection((err, server) => {
   if (err) {
     throw err
