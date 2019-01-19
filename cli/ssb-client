@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+var program = require('commander')
+
+program
+  .command('whoami', 'Print the ID of the current user')
+  .parse(process.argv)

@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+
+var program = require('commander')
+var Connection = require('..')
+
+program
+  .option('-j, --json', 'Print output in full json instead of just the id')
+  .parse(process.argv)
+
+Connection((err, server) => {
+  if (err) {
+    throw err
+  }
+
+  server.whoami((err, keys) => {
+    if (err) {
+      server.close()
+      throw err
+    } else {
+      if (program.json) {
+        console.log(keys)
+      } else {
+        console.log(keys['id'])
+      }
+    }
+
+    server.close()
+  })
+})

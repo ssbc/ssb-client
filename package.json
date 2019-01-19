@@ -11,6 +11,7 @@
     "url": "https://github.com/ssbc/ssb-client.git"
   },
   "dependencies": {
+    "commander": "^2.19.0",
     "explain-error": "^1.0.1",
     "multicb": "^1.2.1",
     "multiserver": "^1.13.2",
@@ -23,6 +24,10 @@
   "devDependencies": {
     "scuttlebot": "^7.3.4",
     "tape": "^4.2.0"
+  },
+  "bin": {
+    "ssb-client": "./cli/ssb-client",
+    "ssb-client-whoami": "./cli/ssb-client-whoami"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
   "license": "MIT",
