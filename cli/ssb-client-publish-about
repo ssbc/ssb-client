@@ -31,7 +31,7 @@ Connection((err, server) => {
       if (program.name) {
         message['name'] = program.name
       }
-      if (program.description) {
+      if (program.description && typeof program.description === 'string') {
         message['description'] = program.description
       }
       if (program.image) {
