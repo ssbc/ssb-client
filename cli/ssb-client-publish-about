@@ -39,6 +39,7 @@ Connection((err, server) => {
       }
 
       server.publish(message, (err) => {
+        console.log(message)
         server.close()
         if (err) {
           throw err
