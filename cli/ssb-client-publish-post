@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+var program = require('commander')
+var Connection = require('..')
+
+program
+  .option('--text <str>', 'Post message in markdown. Be sure to quote for command line')
+  .option('--channel <str>', 'Channel to associate this message with')
+  .option('--root <hash>', 'Hash of root message in the thread')
+  .option('--branch <hash>', 'Hash of replied-to message in the thread')
+  .option('--mentions <hashes>', 'Hashes of mentioned blobs, people, messages')
+  .parse(process.argv)
+
+if (!program.text) {
+  console.log('Text argument is required')
+  program.help()
+}
+
+Connection((err, server) => {
+  if (err) {
+    throw err
+  }
+
+  server.whoami((err, keys) => {
+    if (err) {
+      server.close()
+      throw err
+    } else {
+      var message = {
+        type: 'post',
+        text: program.text
+      }
+
+      if (program.channel) {
+        message['channel'] = program.channel
+      }
+      if (program.root) {
+        message['root'] = program.root
+      }
+      if (program.branch) {
+        message['branch'] = program.branch
+      }
+      if (program.mentions) {
+        message['mentions'] = program.mentions.split(',')
+      }
+
+      server.publish(message, (err) => {
+        console.log(message)
+        server.close()
+        if (err) {
+          throw err
+        }
+      })
+    }
+
+    server.close()
+  })
+})
