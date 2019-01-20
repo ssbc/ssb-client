@@ -9,17 +9,23 @@ var shsCap = 'XMHDXXFGBJvloCk8fOinzPkKMRqyA2/eH+3VyUr6lig='
 
 var keys = ssbKeys.generate()
 var server = ssbServer({
-  port: 45451, timeout: 2001,
-  temp: 'connect',
   host: 'localhost',
+  port: 45451,
+  timeout: 2001,
+  temp: 'connect', // what's this
   master: keys.id,
   keys: keys,
   appKey: shsCap
 })
 
 tape('connect', function (t) {
+  const opts = {
+    port: 45451,
+    manifest: server.manifest(),
+    caps: { shs: shsCap }
+  }
 
-  ssbClient(keys, { port: 45451, manifest: server.manifest(), caps: { shs: shsCap }}, function (err, client) {
+  ssbClient(keys, opts, function (err, client) {
     if (err) throw err
 
     client.whoami(function (err, info) {
@@ -33,5 +39,4 @@ tape('connect', function (t) {
       process.exit(0)
     })
   })
-
 })
