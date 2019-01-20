@@ -27,7 +27,12 @@
   },
   "bin": {
     "ssb-client": "./cli/ssb-client",
-    "ssb-client-whoami": "./cli/ssb-client-whoami"
+    "ssb-client-whoami": "./cli/ssb-client-whoami",
+    "ssb-client-publish": "./cli/ssb-client-publish",
+    "ssb-client-publish-about": "./cli/ssb-client-publish-about",
+    "ssb-client-publish-contact": "./cli/ssb-client-publish-contact",
+    "ssb-client-publish-post": "./cli/ssb-client-publish-post",
+    "ssb-client-publish-vote": "./cli/ssb-client-publish-vote"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
   "license": "MIT",
