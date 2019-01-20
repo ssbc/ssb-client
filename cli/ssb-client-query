@@ -105,7 +105,7 @@ Connection((err, server) => {
     filter['value']['content']['vote']['reason'] = program.reason
   }
 
-  function onDone(err, msgs) {
+  function onDone (err, msgs) {
     if (err) {
       server.close()
       throw err

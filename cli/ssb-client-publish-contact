@@ -34,20 +34,20 @@ Connection((err, server) => {
       }
 
       switch (program.action) {
-      case 'follow':
-        message['following'] = true
-        break
-      case 'unfollow':
-        message['following'] = false
-        break
-      case 'block':
-        message['blocking'] = true
-        break
-      case 'unblock':
-        message['blocking'] = false
-        break
-      default:
-        throw Object('Unsupported action')
+        case 'follow':
+          message['following'] = true
+          break
+        case 'unfollow':
+          message['following'] = false
+          break
+        case 'block':
+          message['blocking'] = true
+          break
+        case 'unblock':
+          message['blocking'] = false
+          break
+        default:
+          throw Object('Unsupported action')
       }
 
       server.publish(message, (err) => {
