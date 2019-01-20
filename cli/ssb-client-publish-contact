@@ -9,11 +9,11 @@ program
     /^(follow|unfollow|block|unblock)$/i)
   .parse(process.argv)
 
-if (!program.contact) {
+if (typeof program.contact !== 'string') {
   console.log('Contact argument is required')
   program.help()
 }
-if (!program.action || typeof program.action !== 'string') {
+if (typeof program.action !== 'string') {
   console.log('Invalid action')
   program.help()
 }

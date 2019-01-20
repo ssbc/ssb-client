@@ -46,47 +46,47 @@ Connection((err, server) => {
     }
   }
 
-  if (program.key) {
+  if (typeof program.key === 'string') {
     filter['key'] = program.key
   }
-  if (program.type) {
+  if (typeof program.type === 'string') {
     filter['value']['content']['type'] = program.type
   }
-  if (program.author) {
+  if (typeof program.author === 'string') {
     filter['value']['author'] = program.author
   }
-  if (program.sequence) {
+  if (typeof program.sequence === 'number') {
     filter['value']['sequence'] = program.sequence
   }
-  if (program.timestamp) {
+  if (typeof program.timestamp === 'number') {
     filter['value']['timestamp'] = program.timestamp
   }
-  if (program.channel) {
+  if (typeof program.channel === 'string') {
     filter['value']['content']['channel'] = program.channel
   }
-  if (program.root) {
+  if (typeof program.root === 'string') {
     filter['value']['content']['root'] = program.root
   }
-  if (program.branch) {
+  if (typeof program.branch === 'string') {
     filter['value']['content']['branch'] = program.branch
   }
-  if (program.about) {
+  if (typeof program.about === 'string') {
     filter['value']['content']['about'] = program.about
   }
-  if (program.name) {
+  if (typeof program.name === 'string') {
     filter['value']['content']['name'] = program.name
   }
-  if (program.image) {
+  if (typeof program.image === 'string') {
     filter['value']['content']['image'] = program.image
   }
-  if (program.contact) {
+  if (typeof program.contact === 'string') {
     filter['value']['content']['contact'] = program.contact
   }
   if (program.action !== undefined && typeof program.action === 'string') {
     filter['value']['content']['action'] = program.action
     // TODO: Translate to following, blocking bools
   }
-  if (program.link) {
+  if (typeof program.link === 'string') {
     if (filter['value']['content']['vote'] === undefined) {
       filter['value']['content']['vote'] = {}
     }
@@ -98,7 +98,7 @@ Connection((err, server) => {
     }
     filter['value']['content']['vote']['value'] = program.value
   }
-  if (program.reason) {
+  if (typeof program.reason === 'string') {
     if (filter['value']['content']['vote'] === undefined) {
       filter['value']['content']['vote'] = {}
     }

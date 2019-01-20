@@ -11,7 +11,7 @@ program
   .option('--mentions <hashes>', 'Hashes of mentioned blobs, people, messages')
   .parse(process.argv)
 
-if (!program.text) {
+if (typeof program.text !== 'string') {
   console.log('Text argument is required')
   program.help()
 }
@@ -31,16 +31,16 @@ Connection((err, server) => {
         text: program.text
       }
 
-      if (program.channel) {
+      if (typeof program.channel === 'string') {
         message['channel'] = program.channel
       }
-      if (program.root) {
+      if (typeof program.root === 'string') {
         message['root'] = program.root
       }
-      if (program.branch) {
+      if (typeof program.branch === 'string') {
         message['branch'] = program.branch
       }
-      if (program.mentions) {
+      if (typeof program.mentions === 'string') {
         message['mentions'] = program.mentions.split(',')
       }
 

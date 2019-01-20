@@ -9,7 +9,7 @@ program
   .option('--reason <text>', 'Reason for the vote')
   .parse(process.argv)
 
-if (!program.link) {
+if (typeof program.link !== 'string') {
   console.log('Link argument is required')
   program.help()
 }
@@ -35,7 +35,7 @@ Connection((err, server) => {
         value: program.value
       }
 
-      if (program.reason) {
+      if (typeof program.reason === 'string') {
         message['reason'] = program.reason
       }
 
