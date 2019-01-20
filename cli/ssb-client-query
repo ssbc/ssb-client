@@ -4,12 +4,26 @@ var program = require('commander')
 var Connection = require('..')
 var pull = require('pull-stream')
 
+function parseRange (str) {
+  const split = str.split('..')
+  if (split.length === 1) {
+    return parseInt(split[0])
+  } else if (split.length === 2) {
+    return {
+      '$gte': parseInt(split[0]),
+      '$lte': parseInt(split[1])
+    }
+  } else {
+    return NaN
+  }
+}
+
 program
   .option('--key <hash>', 'Message hash')
   .option('--type <str>', 'Message type')
   .option('--author <hash>', 'Author of the message')
-  .option('--sequence <int>', 'Sequence number', parseInt) // TODO: ranges
-  .option('--timestamp <int>', 'Time message was written', parseInt) // TODO: ranges, dates
+  .option('--sequence <int>', 'Sequence number(Ranges supported: 5..6)', parseRange)
+  .option('--timestamp <int>', 'Time message was written(Ranges supported: 15000..16000)', parseRange)
   .option('--head <int>', 'Output only the first N messages', parseInt)
   .option('--tail <int>', 'Output only the last N messages', parseInt)
   // Post messages
@@ -55,10 +69,10 @@ Connection((err, server) => {
   if (typeof program.author === 'string') {
     filter['value']['author'] = program.author
   }
-  if (typeof program.sequence === 'number') {
+  if (typeof program.sequence === 'number' || typeof program.sequence === 'object') {
     filter['value']['sequence'] = program.sequence
   }
-  if (typeof program.timestamp === 'number') {
+  if (typeof program.timestamp === 'number' || typeof program.timestamp === 'object') {
     filter['value']['timestamp'] = program.timestamp
   }
   if (typeof program.channel === 'string') {
