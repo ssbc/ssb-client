@@ -17,11 +17,11 @@
     "muxrpc": "^6.4.0",
     "pull-hash": "^1.0.0",
     "pull-stream": "^3.6.0",
-    "ssb-config": "^2.2.0",
+    "ssb-config": "^3.2.2",
     "ssb-keys": "^7.0.13"
   },
   "devDependencies": {
-    "scuttlebot": "^7.3.4",
+    "ssb-server": "^13.6.1",
     "tape": "^4.2.0"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",

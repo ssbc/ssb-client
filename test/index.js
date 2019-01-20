@@ -1,7 +1,7 @@
 var tape = require('tape')
 var ssbKeys = require('ssb-keys')
-var ssbServer = require('scuttlebot')
-  .use(require('scuttlebot/plugins/master'))
+var ssbServer = require('ssb-server')
+  .use(require('ssb-server/plugins/master'))
 
 var ssbClient = require('../')
 
