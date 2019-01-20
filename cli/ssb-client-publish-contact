@@ -17,7 +17,6 @@ if (!program.action || typeof program.action !== 'string') {
   console.log('Invalid action')
   program.help()
 }
-console.log(program.action)
 
 Connection((err, server) => {
   if (err) {
