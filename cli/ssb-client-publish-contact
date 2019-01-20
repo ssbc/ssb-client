@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+var program = require('commander')
+var Connection = require('..')
+
+program
+  .option('--contact <hash>', 'Person to follow or block')
+  .option('--action <verb>', 'Action to apply(follow, unfollow, block, unblock)',
+    /^(follow|unfollow|block|unblock)$/i)
+  .parse(process.argv)
+
+if (!program.contact) {
+  console.log('Contact argument is required')
+  program.help()
+}
+if (!program.action || typeof program.action !== 'string') {
+  console.log('Invalid action')
+  program.help()
+}
+console.log(program.action)
+
+Connection((err, server) => {
+  if (err) {
+    throw err
+  }
+
+  server.whoami((err, keys) => {
+    if (err) {
+      server.close()
+      throw err
+    } else {
+      var message = {
+        type: 'contact',
+        contact: program.contact
+      }
+
+      switch (program.action) {
+      case 'follow':
+        message['following'] = true
+        break
+      case 'unfollow':
+        message['following'] = false
+        break
+      case 'block':
+        message['blocking'] = true
+        break
+      case 'unblock':
+        message['blocking'] = false
+        break
+      default:
+        throw Object('Unsupported action')
+      }
+
+      server.publish(message, (err) => {
+        console.log(message)
+        server.close()
+        if (err) {
+          throw err
+        }
+      })
+    }
+
+    server.close()
+  })
+})
