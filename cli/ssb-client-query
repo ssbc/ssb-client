@@ -1,0 +1,117 @@
+#!/usr/bin/env node
+
+var program = require('commander')
+var Connection = require('..')
+var pull = require('pull-stream')
+
+program
+  .option('--key <hash>', 'Message hash')
+  .option('--type <str>', 'Message type')
+  .option('--author <hash>', 'Author of the message')
+  .option('--sequence <int>', 'Sequence number', parseInt) // TODO: ranges
+  .option('--timestamp <int>', 'Time message was written', parseInt) // TODO: ranges, dates
+  .option('--head <int>', 'Output only the first N messages') // TODO
+  .option('--tail <int>', 'Output only the last N messages') // TODO
+  // Post messages
+  .option('--channel <str>', 'Channel the message was posted to')
+  .option('--root <hash>', 'Thread the message was posted to')
+  .option('--branch <hash>', 'Thread-branch this message was posted to')
+  // About messages
+  .option('--about <hash>', 'Who the message is about')
+  .option('--name <str>', 'About messages setting the name to the specified value')
+  .option('--image <hash>', 'About messages setting the image to the specified value')
+  // Contact messages
+  .option('--contact <hash>', 'Person being followed or blocked')
+  .option('--action <verb>', 'Action being applied(follow, unfollow, block, unblock)',
+    /^(follow|unfollow|block|unblock)$/i)
+  // Vote messages
+  .option('--link <hash>', 'Person, message, channel, etc being voted on')
+  .option('--value <-1,0,1>', 'Value of vote(1 is positive, -1 is negative)', parseInt)
+  .option('--reason <text>', 'Reason for the vote')
+  .parse(process.argv)
+
+if (program.rawArgs.length <= 2) {
+  console.log('Must specify at least one filter option')
+  program.help()
+}
+
+Connection((err, server) => {
+  if (err) {
+    throw err
+  }
+
+  var filter = {
+    value: {
+      content: {
+        vote: {}
+      }
+    }
+  }
+
+  if (program.key) {
+    filter['key'] = program.key
+  }
+  if (program.type) {
+    filter['value']['content']['type'] = program.type
+  }
+  if (program.author) {
+    filter['value']['author'] = program.author
+  }
+  if (program.sequence) {
+    filter['value']['sequence'] = program.sequence
+  }
+  if (program.timestamp) {
+    filter['value']['timestamp'] = program.timestamp
+  }
+  if (program.channel) {
+    filter['value']['content']['channel'] = program.channel
+  }
+  if (program.root) {
+    filter['value']['content']['root'] = program.root
+  }
+  if (program.branch) {
+    filter['value']['content']['branch'] = program.branch
+  }
+  if (program.about) {
+    filter['value']['content']['about'] = program.about
+  }
+  if (program.name) {
+    filter['value']['content']['name'] = program.name
+  }
+  if (program.image) {
+    filter['value']['content']['image'] = program.image
+  }
+  if (program.contact) {
+    filter['value']['content']['contact'] = program.contact
+  }
+  if (program.action !== undefined && typeof program.action === 'string') {
+    filter['value']['content']['action'] = program.action
+    // TODO: Translate to following, blocking bools
+  }
+  if (program.link) {
+    filter['value']['content']['vote']['link'] = program.link
+  }
+  if (program.value !== undefined) {
+    filter['value']['content']['vote']['value'] = program.value
+  }
+  if (program.reason) {
+    filter['value']['content']['vote']['reason'] = program.reason
+  }
+
+  pull(
+    server.query.read({
+      query: [{
+        $filter: filter
+      }]
+    }),
+    pull.collect((err, msgs) => {
+      if (err) {
+        server.close()
+        throw err
+      }
+
+      console.log(JSON.stringify(msgs, null, 2))
+      server.close()
+    })
+  )
+})
