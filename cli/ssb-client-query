@@ -10,8 +10,8 @@ program
   .option('--author <hash>', 'Author of the message')
   .option('--sequence <int>', 'Sequence number', parseInt) // TODO: ranges
   .option('--timestamp <int>', 'Time message was written', parseInt) // TODO: ranges, dates
-  .option('--head <int>', 'Output only the first N messages') // TODO
-  .option('--tail <int>', 'Output only the last N messages') // TODO
+  .option('--head <int>', 'Output only the first N messages', parseInt)
+  .option('--tail <int>', 'Output only the last N messages', parseInt)
   // Post messages
   .option('--channel <str>', 'Channel the message was posted to')
   .option('--root <hash>', 'Thread the message was posted to')
@@ -98,20 +98,48 @@ Connection((err, server) => {
     filter['value']['content']['vote']['reason'] = program.reason
   }
 
-  pull(
-    server.query.read({
-      query: [{
-        $filter: filter
-      }]
-    }),
-    pull.collect((err, msgs) => {
-      if (err) {
-        server.close()
-        throw err
-      }
-
-      console.log(JSON.stringify(msgs, null, 2))
+  function onDone(err, msgs) {
+    if (err) {
       server.close()
-    })
-  )
+      throw err
+    }
+
+    console.log(JSON.stringify(msgs, null, 2))
+    server.close()
+  }
+
+  if (typeof program.head === 'number') {
+    // Take only the first N
+    pull(
+      server.query.read({
+        query: [{
+          $filter: filter
+        }]
+      }),
+      pull.take(program.head),
+      pull.collect(onDone)
+    )
+  } else if (typeof program.tail === 'number') {
+    // Take only the last N
+    pull(
+      server.query.read({
+        reverse: true,
+        query: [{
+          $filter: filter
+        }]
+      }),
+      pull.take(program.tail),
+      pull.collect(onDone)
+    )
+  } else {
+    // Standard -- take all
+    pull(
+      server.query.read({
+        query: [{
+          $filter: filter
+        }]
+      }),
+      pull.collect(onDone)
+    )
+  }
 })
