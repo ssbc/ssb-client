@@ -42,9 +42,7 @@ Connection((err, server) => {
 
   var filter = {
     value: {
-      content: {
-        vote: {}
-      }
+      content: {}
     }
   }
 
@@ -89,12 +87,21 @@ Connection((err, server) => {
     // TODO: Translate to following, blocking bools
   }
   if (program.link) {
+    if (filter['value']['content']['vote'] === undefined) {
+      filter['value']['content']['vote'] = {}
+    }
     filter['value']['content']['vote']['link'] = program.link
   }
   if (program.value !== undefined) {
+    if (filter['value']['content']['vote'] === undefined) {
+      filter['value']['content']['vote'] = {}
+    }
     filter['value']['content']['vote']['value'] = program.value
   }
   if (program.reason) {
+    if (filter['value']['content']['vote'] === undefined) {
+      filter['value']['content']['vote'] = {}
+    }
     filter['value']['content']['vote']['reason'] = program.reason
   }
 
