@@ -1,56 +1,55 @@
 'use strict'
-var explain     = require('explain-error')
+var explain = require('explain-error')
 
 var MultiServer = require('multiserver')
 var WS          = require('multiserver/plugins/ws')
 var Net         = require('multiserver/plugins/net')
-var Onion       = require('multiserver/plugins/onion')
 var Shs         = require('multiserver/plugins/shs')
+var Onion       = require('multiserver/plugins/onion')
 var NoAuth      = require('multiserver/plugins/noauth')
 var UnixSock    = require('multiserver/plugins/unix-socket')
-
-var muxrpc      = require('muxrpc')
 var pull        = require('pull-stream')
+var muxrpc      = require('muxrpc')
 
 var buildConfig = require('./build-config')
 var fixBlobsAdd = require('./blobs')
-var SodiumKeys  = require('./util/sodium-keys')
 
+function Client (keys, opts, cb) {
+  if (typeof keys === 'function') return Client(null, null, keys)
+  if (typeof opts === 'function') return Client(null, keys, opts)
 
-module.exports = function (keys, opts, cb) {
-  var config = buildConfig(keys, opts, cb)
+  var config = buildConfig(keys, opts)
 
   var shs = Shs({
-    keys: SodiumKeys(keys),
+    keys: config.sodiumKeys,
     appKey: config.appKey,
 
-    //no client auth. we can't receive connections anyway.
+    // no client auth. we can't receive connections anyway.
     auth: function (cb) { cb(null, false) },
     timeout: config.timeout
   })
+  var noAuth = NoAuth({ keys: config.sodiumKeys })
 
   var ms = MultiServer([
     [Net({}), shs],
     [Onion({}), shs],
     [WS({}), shs],
-    [UnixSock({}), NoAuth({
-      keys: SodiumKeys(keys)
-    })],
-    [Net({}), NoAuth({
-      keys: SodiumKeys(keys)
-    })]
+    [UnixSock({}), noAuth],
+    [Net({}), noAuth]
   ])
 
   ms.client(config.remote, function (err, stream) {
-    if(err) return cb(explain(err, 'could not connect to sbot'))
+    if (err) return cb(explain(err, 'could not connect to sbot'))
+
     var sbot = muxrpc(config.manifest, false)()
-    sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
+    sbot.id = '@' + stream.remote.toString('base64') + '.' + (config.keys.curve || 'ed25519')
 
     // fix blobs.add. (see ./blobs.js)
-    if (sbot.blobs && sbot.blobs.add)
-      sbot.blobs.add = fixBlobsAdd(sbot.blobs.add)
+    if (sbot.blobs && sbot.blobs.add) { sbot.blobs.add = fixBlobsAdd(sbot.blobs.add) }
 
     pull(stream, sbot.createStream(), stream)
     cb(null, sbot, config)
   })
 }
+
+module.exports = Client

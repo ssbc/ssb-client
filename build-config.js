@@ -1,26 +1,18 @@
-var path    = require('path')
-var ssbKeys = require('ssb-keys')
-var fs      = require('fs')
-var Config  = require('ssb-config/inject')
-var explain = require('explain-error')
+var path        = require('path')
+var ssbKeys     = require('ssb-keys') // TODO rm
+var fs          = require('fs')
+var Config      = require('ssb-config/inject')
+var explain     = require('explain-error')
+var SodiumKeys  = require('./util/sodium-keys')
 
-module.exports = function buildConfig (keys, opts, cb) {
+module.exports = function buildConfig (keys, opts) {
   var config
-  if (typeof keys == 'function') {
-    cb = keys
-    keys = null
-    opts = null
-  }
-  else if (typeof opts == 'function') {
-    cb = opts
-    opts = keys
-    keys = null
-  }
   if(typeof opts === 'string' || opts == null || !keys)
     config = Config((typeof opts === 'string' ? opts : null) || process.env.ssb_appname)
   else if(opts && 'object' === typeof opts)
     config = opts
 
+  // NOTE keys is loaded by the new ssb-config!
   keys = keys || ssbKeys.loadOrCreateSync(path.join(config.path, 'secret'))
   opts = opts || {}
 
@@ -49,10 +41,11 @@ module.exports = function buildConfig (keys, opts, cb) {
   })()
 
   return {
-    appKey: new Buffer(config.caps.shs, 'base64'),
+    appKey: Buffer.from(config.caps.shs, 'base64'),
+    keys: keys,
+    manifest: manifest,
     remote: remote,
-    timeout: (config.timers && config.timers.handshake) || 3000,
-    manifest, manifest,
-    config: config
+    sodiumKeys: SodiumKeys(keys),
+    timeout: (config.timers && config.timers.handshake) || 3000
   }
 }
