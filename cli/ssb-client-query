@@ -83,8 +83,22 @@ Connection((err, server) => {
     filter['value']['content']['contact'] = program.contact
   }
   if (program.action !== undefined && typeof program.action === 'string') {
-    filter['value']['content']['action'] = program.action
-    // TODO: Translate to following, blocking bools
+    switch (program.action) {
+      case 'follow':
+        filter['value']['content']['following'] = true
+        break
+      case 'unfollow':
+        filter['value']['content']['following'] = false
+        break
+      case 'block':
+        filter['value']['content']['blocking'] = true
+        break
+      case 'unblock':
+        filter['value']['content']['blocking'] = false
+        break
+      default:
+        throw Object('Unsupported action')
+    }
   }
   if (typeof program.link === 'string') {
     if (filter['value']['content']['vote'] === undefined) {
