@@ -6,6 +6,7 @@ program
   .command('about', 'Publish a message of the type about')
   .command('post', 'Publish a message')
   .command('contact', 'Publish a contact message')
+  .command('vote', 'Publish a vote message')
   .parse(process.argv)
 
 if (!program.args.length) program.help()

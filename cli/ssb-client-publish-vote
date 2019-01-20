@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+
+var program = require('commander')
+var Connection = require('..')
+
+program
+  .option('--link <hash>', 'Person, message, channel, etc to vote on')
+  .option('--value <-1,0,1>', 'Value of vote(1 is positive, -1 is negative)', parseInt)
+  .option('--reason <text>', 'Reason for the vote')
+  .parse(process.argv)
+
+if (!program.link) {
+  console.log('Link argument is required')
+  program.help()
+}
+
+if (program.value !== -1 && program.value !== 0 && program.value !== 1) {
+  console.log('Value argument invalid')
+  program.help()
+}
+
+Connection((err, server) => {
+  if (err) {
+    throw err
+  }
+
+  server.whoami((err, keys) => {
+    if (err) {
+      server.close()
+      throw err
+    } else {
+      var message = {
+        type: 'vote',
+        link: program.link,
+        value: program.value
+      }
+
+      if (program.reason) {
+        message['reason'] = program.reason
+      }
+
+      server.publish(message, (err) => {
+        console.log(message)
+        server.close()
+        if (err) {
+          throw err
+        }
+      })
+    }
+
+    server.close()
+  })
+})
