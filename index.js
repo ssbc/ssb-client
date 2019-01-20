@@ -14,22 +14,14 @@ var pull        = require('pull-stream')
 
 var buildConfig = require('./build-config')
 var fixBlobsAdd = require('./blobs')
+var SodiumKeys  = require('./util/sodium-keys')
 
-function toSodiumKeys(keys) {
-  if(!keys || !keys.public) return null
-  return {
-    publicKey:
-      new Buffer(keys.public.replace('.ed25519',''), 'base64'),
-    secretKey:
-      new Buffer(keys.private.replace('.ed25519',''), 'base64'),
-  }
-}
 
 module.exports = function (keys, opts, cb) {
   var config = buildConfig(keys, opts, cb)
 
   var shs = Shs({
-    keys: toSodiumKeys(keys),
+    keys: SodiumKeys(keys),
     appKey: config.appKey,
 
     //no client auth. we can't receive connections anyway.
@@ -42,10 +34,10 @@ module.exports = function (keys, opts, cb) {
     [Onion({}), shs],
     [WS({}), shs],
     [UnixSock({}), NoAuth({
-      keys: toSodiumKeys(keys)
+      keys: SodiumKeys(keys)
     })],
     [Net({}), NoAuth({
-      keys: toSodiumKeys(keys)
+      keys: SodiumKeys(keys)
     })]
   ])
 
