@@ -40,6 +40,9 @@ ssbClient(
 )
 ```
 
+* Tutorials using this library to create basic clients: [ssb-client-basic](https://github.com/mixmix/ssb-client-basic)
+* A simple command line wrapper around this library: [ssb-client-cli](https://github.com/qypea/ssb-client-cli)
+
 ### keys
 See [ssb-keys](https://github.com/ssbc/ssb-keys). The keys look like this:
 ```js
