@@ -20,7 +20,7 @@ module.exports = function buildConfig (keys, opts) {
   if(opts.remote)
     remote = opts.remote
   else {
-    var host = opts.host || 'localhost'
+    var host = opts.host || config.host || 'localhost'
     var port = opts.port || config.port || 8008
     var key = opts.key || keys.id
 
@@ -41,11 +41,11 @@ module.exports = function buildConfig (keys, opts) {
   })()
 
   return {
-    appKey: Buffer.from(config.caps.shs, 'base64'),
+    appKey: (opts.caps && opts.caps.shs && Buffer.from(opts.caps.shs, 'base64')) || (config.caps && config.caps.shs && Buffer.from(config.caps.shs, 'base64')),
     keys: keys,
     manifest: manifest,
     remote: remote,
     sodiumKeys: SodiumKeys(keys),
-    timeout: (config.timers && config.timers.handshake) || 3000
+    timeout: (opts.timers && opts.timers.handshake) || (config.timers && config.timers.handshake) || 3000
   }
 }

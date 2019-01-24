@@ -4,10 +4,8 @@ function toSodiumKeys (keys) {
   if (!keys || !keys.public) return null
 
   return {
-    publicKey:
-      Buffer.from(trimCurve(keys.public, keys.curve), 'base64'),
-    secretKey:
-      Buffer.from(trimCurve(keys.private, keys.curve), 'base64')
+    publicKey: Buffer.from(trimCurve(keys.public, keys.curve), 'base64'),
+    secretKey: Buffer.from(trimCurve(keys.private, keys.curve), 'base64')
   }
 }
 
