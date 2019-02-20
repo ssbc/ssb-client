@@ -94,6 +94,9 @@ module.exports = function (keys, opts, cb) {
     [Net({}), NoAuth({
       keys: toSodiumKeys(keys)
     })],
+    [WS({}), NoAuth({
+      keys: toSodiumKeys(keys)
+    })]
   ])
 
   ms.client(remote, function (err, stream) {
