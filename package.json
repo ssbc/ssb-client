@@ -1,6 +1,6 @@
 {
   "name": "ssb-client",
-  "version": "4.6.4",
+  "version": "4.6.5",
   "description": "scuttlebot client",
   "main": "index.js",
   "scripts": {
