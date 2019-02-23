@@ -21,7 +21,7 @@
     "ssb-keys": "^7.0.13"
   },
   "devDependencies": {
-    "scuttlebot": "^7.3.4",
+    "ssb-server": "^14.1.2",
     "tape": "^4.2.0"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
