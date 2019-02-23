@@ -14,7 +14,7 @@ var server = ssbServer({
   host: 'localhost',
   master: keys.id,
   keys: keys,
-  appKey: shsCap
+  caps: {shs: shsCap}
 })
 
 tape('connect', function (t) {
