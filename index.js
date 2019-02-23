@@ -84,16 +84,16 @@ module.exports = function (keys, opts, cb) {
     timeout: config.timers && config.timers.handshake || 3000
   })
 
+  var noauth = NoAuth({
+    keys: toSodiumKeys(keys)
+  })
+
   var ms = MultiServer([
     [Net({}), shs],
     [Onion({}), shs],
     [WS({}), shs],
-    [UnixSock({}), NoAuth({
-      keys: toSodiumKeys(keys)
-    })],
-    [Net({}), NoAuth({
-      keys: toSodiumKeys(keys)
-    })],
+    [UnixSock({}), noauth],
+    [Net({}), noauth]
   ])
 
   ms.client(remote, function (err, stream) {
