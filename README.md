@@ -43,6 +43,46 @@ ssbClient(
 * Tutorials using this library to create basic clients: [ssb-client-basic](https://github.com/mixmix/ssb-client-basic)
 * A simple command line wrapper around this library: [ssb-client-cli](https://github.com/qypea/ssb-client-cli)
 
+## api
+
+### require('ssb-client') => createEasyClient
+
+#### createEasyClient(cb(err, sbot))
+
+create a connection to the local `ssb-server` instance, using the default keys.
+configuration and keys will be loaded from directory specified by `ssb_appname`.
+(by default `~/.ssb`)
+
+The manifest will be the manifest provided by that server.
+
+Calling this without arguments is handy for scripts, but applications
+should use the clearer apis.
+
+there is a legacy api, that makes things as "easy" as possible,
+by loading configuration and defaults. This is useful for scripts
+but applications should probably use 
+
+##### createEasyClient(keys, opts, cb(err, sbot))
+
+connect to a client with some custom settings.
+
+opts supports the keys:
+
+* `remote` multiserver address to connect to
+* `host, port, key` (legacy) if remote is not set, assemble address from host, port, key.
+* `manifest` use a custom manifest.
+
+it's recommended to use the `createClient` api instead, but this is still supported
+for legacy support.
+
+### require('ssb-client/client') => createClient
+
+### createClient({keys, config, manifest, remote}, cb)
+
+connect to a specific server with fixed settings. All fields are mandatory.
+
+
+
 ### keys
 See [ssb-keys](https://github.com/ssbc/ssb-keys). The keys look like this:
 ```js
@@ -65,3 +105,5 @@ var appKey = new Buffer(opts.caps.shs, 'base64')
 ## License
 
 MIT, Copyright 2015 Paul Frazee and Dominic Tarr
+
+
