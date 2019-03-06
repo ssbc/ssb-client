@@ -15,9 +15,9 @@ function toSodiumKeys(keys) {
   if(!keys || !keys.public) return null
   return {
     publicKey:
-      new Buffer(keys.public.replace('.ed25519',''), 'base64'),
+      Buffer.from(keys.public.replace('.ed25519',''), 'base64'),
     secretKey:
-      new Buffer(keys.private.replace('.ed25519',''), 'base64'),
+      Buffer.from(keys.private.replace('.ed25519',''), 'base64'),
   }
 }
 
