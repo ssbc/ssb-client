@@ -5,6 +5,7 @@ var Onion       = require('multiserver/plugins/onion')
 var Shs         = require('multiserver/plugins/shs')
 var NoAuth      = require('multiserver/plugins/noauth')
 var UnixSock    = require('multiserver/plugins/unix-socket')
+var explain     = require('explain-error')
 
 var muxrpc      = require('muxrpc')
 var pull        = require('pull-stream')
