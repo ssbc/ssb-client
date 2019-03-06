@@ -1,8 +1,8 @@
-# ssb-client v2
+# ssb-client
 
-[Scuttlebot](https://github.com/ssbc/scuttlebot) client. 
+[ssb-server](https://github.com/ssbc/ssb-server) client. 
 
-Create an rpc connection to an sbot running locally. 
+Create an rpc connection to an ssb-server running locally. 
 
 ## example
 
@@ -10,9 +10,9 @@ Create an rpc connection to an sbot running locally.
 var ssbClient = require('ssb-client')
 var ssbKeys = require('ssb-keys')
 
-// simplest usage, connect to localhost sbot
-// this will cb with an error if an sbot server is not running
-ssbClient(function (err, sbot) {
+// simplest usage, connect to localhost ssb-server
+// this will cb with an error if an ssb-server server is not running
+ssbClient(function (err, ssbServer) {
   // ...
 })
 
@@ -34,14 +34,16 @@ ssbClient(
     manifest: {}       
 
   },
-  function (err, sbot, config) {
+  function (err, ssbServer, config) {
     // ...
   }
 )
 ```
 
 ### keys
+
 See [ssb-keys](https://github.com/ssbc/ssb-keys). The keys look like this:
+
 ```js
 {
     id: String,
@@ -52,12 +54,12 @@ See [ssb-keys](https://github.com/ssbc/ssb-keys). The keys look like this:
 ```
 
 ### caps
-`caps.shs` is a random string passed to [secret-handshake](https://github.com/auditdrivencrypto/secret-handshake#example). It determines which sbot you are able to connect to. It defaults to a magic string in this repo and also in [scuttlebot](https://github.com/ssbc/scuttlebot/blob/master/lib/ssb-cap.js)
+
+`caps.shs` is a random string passed to [secret-handshake](https://github.com/auditdrivencrypto/secret-handshake#example). It determines which ssb-server you are able to connect to. It defaults to a magic string in this repo and also in [ssb-config](https://github.com/ssbc/ssb-config/blob/master/defaults.js)
 
 ```js
-var appKey = new Buffer(opts.caps.shs, 'base64')
+var appKey = Buffer.from(opts.caps.shs, 'base64')
 ```
-
 
 ## License
 

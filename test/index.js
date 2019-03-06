@@ -1,11 +1,13 @@
 var tape = require('tape')
 var ssbKeys = require('ssb-keys')
-var ssbServer = require('scuttlebot')
-  .use(require('scuttlebot/plugins/master'))
+var ssbServer = require('ssb-server')
+  .use(require('ssb-server/plugins/master'))
 
 var ssbClient = require('../')
 
-var shsCap = 'XMHDXXFGBJvloCk8fOinzPkKMRqyA2/eH+3VyUr6lig='
+const caps = {
+  shs: 'XMHDXXFGBJvloCk8fOinzPkKMRqyA2/eH+3VyUr6lig='
+}
 
 var keys = ssbKeys.generate()
 var server = ssbServer({
@@ -13,13 +15,13 @@ var server = ssbServer({
   temp: 'connect',
   host: 'localhost',
   master: keys.id,
-  keys: keys,
-  appKey: shsCap
+  keys,
+  caps,
 })
 
 tape('connect', function (t) {
 
-  ssbClient(keys, { port: 45451, manifest: server.manifest(), caps: { shs: shsCap }}, function (err, client) {
+  ssbClient(keys, { port: 45451, manifest: server.manifest(), caps }, function (err, client) {
     if (err) throw err
 
     client.whoami(function (err, info) {

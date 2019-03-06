@@ -13,15 +13,15 @@
   "dependencies": {
     "explain-error": "^1.0.1",
     "multicb": "^1.2.1",
-    "multiserver": "^1.13.2",
+    "multiserver": "^3.3.0",
     "muxrpc": "^6.4.0",
     "pull-hash": "^1.0.0",
     "pull-stream": "^3.6.0",
-    "ssb-config": "^2.2.0",
+    "ssb-config": "^3.2.5",
     "ssb-keys": "^7.0.13"
   },
   "devDependencies": {
-    "scuttlebot": "^7.3.4",
+    "ssb-server": "^14.1.6",
     "tape": "^4.2.0"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
