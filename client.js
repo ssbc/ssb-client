@@ -68,18 +68,14 @@ module.exports = function (opts, cb) {
 
   ms.client(remote, function (err, stream) {
     if(err) return cb(explain(err, 'could not connect to sbot'))
-    var sbot = muxrpc(manifest, false)()
-    sbot.id = '@'+stream.remote.toString('base64')+'.ed25519'
+    var sbot = muxrpc(manifest, false, null, '@'+stream.remote.toString('base64')+'.ed25519')
 
     // fix blobs.add. (see ./blobs.js)
     if (sbot.blobs && sbot.blobs.add)
       sbot.blobs.add = fixBlobsAdd(sbot.blobs.add)
 
-    pull(stream, sbot.createStream(), stream)
+    pull(stream, sbot.stream, stream)
     cb(null, sbot, config)
   })
 }
-
-
-
 
