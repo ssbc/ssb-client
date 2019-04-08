@@ -2,7 +2,7 @@
 
 [Scuttlebot](https://github.com/ssbc/scuttlebot) client.
 
-Create an [rpc connection](https://ssbc.github.io/scuttlebutt-protocol-guide/#rpc-protocol) to an sbot running locally. 
+Create an [rpc connection](https://ssbc.github.io/scuttlebutt-protocol-guide/#rpc-protocol) to an sbot running locally.
 
 ## example
 
@@ -77,7 +77,7 @@ for legacy support.
 
 ### require('ssb-client/client') => createClient
 
-### createClient({keys, config, manifest, remote}, cb)
+#### createClient({keys, config, manifest, remote}, cb)
 
 connect to a specific server with fixed settings. All fields are mandatory.
 
