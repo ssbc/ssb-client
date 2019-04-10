@@ -1,8 +1,8 @@
 # ssb-client v2
 
-[Scuttlebot](https://github.com/ssbc/scuttlebot) client. 
+[Scuttlebot](https://github.com/ssbc/scuttlebot) client.
 
-Create an rpc connection to an sbot running locally. 
+Create an [rpc connection](https://ssbc.github.io/scuttlebutt-protocol-guide/#rpc-protocol) to an sbot running locally.
 
 ## example
 
@@ -60,7 +60,7 @@ should use the clearer apis.
 
 there is a legacy api, that makes things as "easy" as possible,
 by loading configuration and defaults. This is useful for scripts
-but applications should probably use 
+but applications should probably use
 
 ##### createEasyClient(keys, opts, cb(err, sbot))
 
@@ -77,7 +77,7 @@ for legacy support.
 
 ### require('ssb-client/client') => createClient
 
-### createClient({keys, config, manifest, remote}, cb)
+#### createClient({keys, config, manifest, remote}, cb)
 
 connect to a specific server with fixed settings. All fields are mandatory.
 
@@ -105,5 +105,3 @@ var appKey = new Buffer(opts.caps.shs, 'base64')
 ## License
 
 MIT, Copyright 2015 Paul Frazee and Dominic Tarr
-
-
