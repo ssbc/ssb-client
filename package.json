@@ -21,6 +21,7 @@
     "ssb-keys": "^7.0.13"
   },
   "devDependencies": {
+    "ssb-master": "^1.0.2",
     "ssb-server": "^14.1.2",
     "tape": "^4.2.0"
   },
