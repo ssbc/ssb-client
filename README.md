@@ -98,7 +98,7 @@ See [ssb-keys](https://github.com/ssbc/ssb-keys). The keys look like this:
 `caps.shs` is a random string passed to [secret-handshake](https://github.com/auditdrivencrypto/secret-handshake#example). It determines which sbot you are able to connect to. It defaults to a magic string in this repo and also in [scuttlebot](https://github.com/ssbc/scuttlebot/blob/master/lib/ssb-cap.js)
 
 ```js
-var appKey = new Buffer(opts.caps.shs, 'base64')
+var appKey = Buffer.from(opts.caps.shs, 'base64')
 ```
 
 
