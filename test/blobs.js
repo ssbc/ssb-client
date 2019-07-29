@@ -1,6 +1,6 @@
 var test = require('tape')
 var pull = require('pull-stream')
-var decorate = require('../blobs.js')
+var decorate = require('../util/fix-add-blob.js')
 
 var data = Buffer.from('Hey')
 var expectedLink = "&WB1DdFcm4O5ikRF4v7OIfD/ildKe63QfDkD5HopwkHo=.sha256"

@@ -10,25 +10,11 @@ var explain     = require('explain-error')
 var muxrpc      = require('muxrpc')
 var pull        = require('pull-stream')
 
-var fixBlobsAdd = require('./blobs')
-
-function toSodiumKeys(keys) {
-  if(!keys || !keys.public) return null
-  return {
-    publicKey:
-      Buffer.from(keys.public.replace('.ed25519',''), 'base64'),
-    secretKey:
-      Buffer.from(keys.private.replace('.ed25519',''), 'base64'),
-  }
-}
-
-function assertHas(opts, key) {
-  if(!Object.hasOwnProperty.call(opts, key))
-    throw new Error('ssb-client:'+key + ' option *must* be provided')
-}
+var fixBlobsAdd = require('./util/fix-add-blob')
+var toSodiumKeys = require('./util/to-sodium-keys')
+var assertHas = require('./util/assert-has')
 
 module.exports = function (opts, cb) {
-
   assertHas(opts, 'keys')
   assertHas(opts, 'remote')
   assertHas(opts, 'config')
@@ -68,14 +54,20 @@ module.exports = function (opts, cb) {
 
   ms.client(remote, function (err, stream) {
     if(err) return cb(explain(err, 'could not connect to sbot'))
-    var sbot = muxrpc(manifest, false, null, '@'+stream.remote.toString('base64')+'.ed25519')
+    var id = '@'+stream.remote.toString('base64')+'.ed25519'
+    // mix: id === config.keys.id, note sure why this is needed
+    var sbot = muxrpc(manifest, false, null, id)
 
-    // fix blobs.add. (see ./blobs.js)
+    // fix blobs.add. (see ./util/fix-add-blob.js)
     if (sbot.blobs && sbot.blobs.add)
       sbot.blobs.add = fixBlobsAdd(sbot.blobs.add)
 
     pull(stream, sbot.stream, stream)
+
+    // mix: I've added this line because somewhere in the stack the id property was removed
+    // and it's broken a bunch of code I've written
+    if (!sbot.id) sbot.id = id
+
     cb(null, sbot, config)
   })
 }
-
