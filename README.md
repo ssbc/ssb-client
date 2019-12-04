@@ -56,7 +56,11 @@ there is a legacy api, that makes things as "easy" as possible,
 by loading configuration and defaults. This is useful for scripts
 but applications should probably use
 
-##### createLegacyClient(keys, opts, cb(err, sbot))
+#### createCustomClient({keys, config, remote}, cb)
+
+Connect to a specific server with fixed settings. All fields are mandatory.
+
+#### createLegacyClient(keys, opts, cb(err, sbot))
 
 connect to a client with some custom settings.
 
@@ -65,14 +69,8 @@ The `opts` object supports the keys:
 * `remote` multiserver address to connect to
 * `host, port, key` (legacy) if remote is not set, assemble address from host, port, key.
 
-It's recommended to use the `createEasyClient` instead, but this is still
-available for legacy support.
-
-### require('ssb-client/client') => createClient
-
-#### createClient({keys, config, remote}, cb)
-
-connect to a specific server with fixed settings. All fields are mandatory.
+If you need custom options it's recommended to use the `createCustomClient` API
+instead, but this is still available for legacy support.
 
 ### keys
 
