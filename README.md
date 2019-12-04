@@ -29,10 +29,6 @@ ssbClient(
         // random string for `appKey` in secret-handshake
         shs: ''
     },
-
-    // optional, muxrpc manifest. Defaults to ~/.ssb/manifest.json
-    manifest: {}       
-
   },
   function (err, sbot, config) {
     // ...
@@ -53,8 +49,6 @@ create a connection to the local `ssb-server` instance, using the default keys.
 configuration and keys will be loaded from directory specified by `ssb_appname`.
 (by default `~/.ssb`)
 
-The manifest will be the manifest provided by that server.
-
 Calling this without arguments is handy for scripts, but applications
 should use the clearer apis.
 
@@ -62,29 +56,28 @@ there is a legacy api, that makes things as "easy" as possible,
 by loading configuration and defaults. This is useful for scripts
 but applications should probably use
 
-##### createEasyClient(keys, opts, cb(err, sbot))
+##### createLegacyClient(keys, opts, cb(err, sbot))
 
 connect to a client with some custom settings.
 
-opts supports the keys:
+The `opts` object supports the keys:
 
 * `remote` multiserver address to connect to
 * `host, port, key` (legacy) if remote is not set, assemble address from host, port, key.
-* `manifest` use a custom manifest.
 
-it's recommended to use the `createClient` api instead, but this is still supported
-for legacy support.
+It's recommended to use the `createEasyClient` instead, but this is still
+available for legacy support.
 
 ### require('ssb-client/client') => createClient
 
-#### createClient({keys, config, manifest, remote}, cb)
+#### createClient({keys, config, remote}, cb)
 
 connect to a specific server with fixed settings. All fields are mandatory.
 
-
-
 ### keys
+
 See [ssb-keys](https://github.com/ssbc/ssb-keys). The keys look like this:
+
 ```js
 {
     id: String,

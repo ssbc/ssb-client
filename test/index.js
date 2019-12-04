@@ -19,18 +19,21 @@ var server = ssbServer({
 
 tape('connect', function (t) {
   server.on('multiserver:listening', () => {
-    ssbClient(keys, { port: 45451, manifest: server.manifest(), caps: { shs: shsCap }}, function (err, client) {
+    ssbClient(keys, {
+      port: 45451,
+      caps: { shs: shsCap }
+    }, function (err, client) {
       if (err) throw err
 
       client.whoami(function (err, info) {
-	if (err) throw err
+        if (err) throw err
 
-	console.log('whoami', info)
-	t.equal(info.id, keys.id)
-	t.end()
-	client.close(true)
-	server.close(true)
-	process.exit(0)
+        console.log('whoami', info)
+        t.equal(info.id, keys.id)
+        t.end()
+        client.close(true)
+        server.close(true)
+        process.exit(0)
       })
     })
   })

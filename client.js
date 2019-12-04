@@ -18,12 +18,10 @@ module.exports = function (opts, cb) {
   assertHas(opts, 'keys')
   assertHas(opts, 'remote')
   assertHas(opts, 'config')
-  assertHas(opts, 'manifest')
 
   var keys = opts.keys
   var remote = opts.remote
   var config = opts.config
-  var manifest = opts.manifest
 
   var shs = Shs({
     keys: toSodiumKeys(keys),
@@ -53,21 +51,36 @@ module.exports = function (opts, cb) {
   ])
 
   ms.client(remote, function (err, stream) {
-    if(err) return cb(explain(err, 'could not connect to sbot'))
-    var id = '@'+stream.remote.toString('base64')+'.ed25519'
-    // mix: id === config.keys.id, note sure why this is needed
-    var sbot = muxrpc(manifest, false, null, id)
+    if(err) {
+      return cb(explain(err, 'could not connect to sbot'))
+    }
 
-    // fix blobs.add. (see ./util/fix-add-blob.js)
-    if (sbot.blobs && sbot.blobs.add)
-      sbot.blobs.add = fixBlobsAdd(sbot.blobs.add)
+    // HACK: This refers to the *remote* feed ID, not our local ID, and we don't
+    // actually have a way of determining the feed type. This is fine when all
+    // feeds are ed25519, but will cause problems in the future.
+    const remoteId = `@${stream.remote.toString('base64')}.ed25519`
+
+    const sbot = muxrpc((err) => {
+      if (err) {
+        return cb(err)
+      }
+
+      // fix blobs.add. (see ./util/fix-add-blob.js)
+      if (sbot.blobs && sbot.blobs.add) {
+        sbot.blobs.add = fixBlobsAdd(sbot.blobs.add)
+      }
+
+      // This refers to the *local* feed ID, and gives us a quick and easy way
+      // to reference ourselves without calling `whoami()`. These may share a
+      // value when the client and server share an identity, but won't be the
+      // same when connecting to a remote server.
+      if (sbot.id == null) {
+        sbot.id = opts.keys.id
+      }
+
+      cb(null, sbot, config)
+    }, false, null, remoteId)
 
     pull(stream, sbot.stream, stream)
-
-    // mix: I've added this line because somewhere in the stack the id property was removed
-    // and it's broken a bunch of code I've written
-    if (!sbot.id) sbot.id = id
-
-    cb(null, sbot, config)
   })
 }

@@ -41,19 +41,8 @@ module.exports = function (keys, opts, cb) {
     remote = protocol+host+':'+port+'~shs:'+key.substring(1).replace('.ed25519', '')
   }
 
-  var manifest = opts.manifest || (function () {
-    try {
-      return JSON.parse(fs.readFileSync(
-        path.join(config.path, 'manifest.json')
-      ))
-    } catch (err) {
-      throw explain(err, 'could not load manifest file')
-    }
-  })()
-
   createClient({
     keys: keys,
-    manifest: manifest,
     config: config,
     remote: remote
   }, cb)
