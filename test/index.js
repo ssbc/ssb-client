@@ -8,21 +8,19 @@ var ssbClient = require('../')
 var shsCap = 'XMHDXXFGBJvloCk8fOinzPkKMRqyA2/eH+3VyUr6lig='
 
 var keys = ssbKeys.generate()
-var server = ssbServer({
-  port: 45451, timeout: 2001,
-  temp: 'connect',
-  host: 'localhost',
-  master: keys.id,
-  keys: keys,
-  caps: {shs: shsCap}
-})
 
-tape('connect', function (t) {
+tape('explicit manifest', function (t) {
+  const server = ssbServer({
+    port: 45451,
+    timeout: 2001,
+    temp: 'connect',
+    host: 'localhost',
+    master: keys.id,
+    keys: keys,
+    caps: { shs: shsCap }
+  })
   server.on('multiserver:listening', () => {
-    ssbClient(keys, {
-      port: 45451,
-      caps: { shs: shsCap }
-    }, function (err, client) {
+    ssbClient(keys, { port: 45451, manifest: server.manifest(), caps: { shs: shsCap } }, function (err, client) {
       if (err) throw err
 
       client.whoami(function (err, info) {
@@ -33,7 +31,33 @@ tape('connect', function (t) {
         t.end()
         client.close(true)
         server.close(true)
-        process.exit(0)
+      })
+    })
+  })
+})
+
+tape('automatic manifest', function (t) {
+  const server = ssbServer({
+    port: 45451,
+    timeout: 2001,
+    temp: 'connect',
+    host: 'localhost',
+    master: keys.id,
+    keys: keys,
+    caps: { shs: shsCap }
+  })
+  server.on('multiserver:listening', () => {
+    ssbClient(keys, { port: 45451, caps: { shs: shsCap } }, function (err, client) {
+      if (err) throw err
+
+      client.whoami(function (err, info) {
+        if (err) throw err
+
+        console.log('whoami', info)
+        t.equal(info.id, keys.id)
+        t.end()
+        client.close(true)
+        server.close(true)
       })
     })
   })
