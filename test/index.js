@@ -36,6 +36,30 @@ tape('explicit manifest', function (t) {
   })
 })
 
+tape('explicit incorrect manifest', function (t) {
+  const server = ssbServer({
+    port: 45451,
+    timeout: 2001,
+    temp: 'connect',
+    host: 'localhost',
+    master: keys.id,
+    keys: keys,
+    caps: { shs: shsCap }
+  })
+  server.on('multiserver:listening', () => {
+    ssbClient(keys, { port: 45451, manifest: { foo: 'async' }, caps: { shs: shsCap } }, function (err, client) {
+      if (err) throw err
+
+      t.equal(typeof client.foo, 'function')
+      t.equal(typeof client.whoami, 'undefined')
+      t.end()
+
+      client.close(true)
+      server.close(true)
+    })
+  })
+})
+
 tape('automatic manifest', function (t) {
   const server = ssbServer({
     port: 45451,
