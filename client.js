@@ -66,12 +66,12 @@ module.exports = function (opts, cb) {
         sbot.blobs.add = fixBlobsAdd(sbot.blobs.add)
       }
 
-      // This refers to the *local* feed ID, and gives us a quick and easy way
-      // to reference ourselves without calling `whoami()`. These may share a
+      // This refers to the *remote* feed ID, and gives us a quick and easy way
+      // to reference the server without calling `whoami()`. These may share a
       // value when the client and server share an identity, but won't be the
-      // same when connecting to a remote server.
+      // same when connecting to a remote server with a different identity.
       if (sbot.id == null) {
-        sbot.id = opts.keys.id
+        sbot.id = remoteId
       }
 
       return sbot
