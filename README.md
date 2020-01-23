@@ -30,8 +30,8 @@ ssbClient(
         shs: ''
     },
 
-    // optional, muxrpc manifest. Defaults to ~/.ssb/manifest.json
-    manifest: {}       
+    // Optional muxrpc manifest. Defaults to manifest provided by server.
+    manifest: {}
 
   },
   function (err, sbot, config) {
@@ -49,8 +49,8 @@ ssbClient(
 
 #### createEasyClient(cb(err, sbot))
 
-create a connection to the local `ssb-server` instance, using the default keys.
-configuration and keys will be loaded from directory specified by `ssb_appname`.
+Create a connection to the local `ssb-server` instance, using the default keys.
+Configuration and keys will be loaded from directory specified by `ssb_appname`.
 (by default `~/.ssb`)
 
 The manifest will be the manifest provided by that server.
@@ -62,9 +62,13 @@ there is a legacy api, that makes things as "easy" as possible,
 by loading configuration and defaults. This is useful for scripts
 but applications should probably use
 
-##### createEasyClient(keys, opts, cb(err, sbot))
+##### createCustomClient({keys, config, manifest, remote}, cb(err, sbot))
 
-connect to a client with some custom settings.
+Connect to a specific server with fixed settings. All fields are mandatory.
+
+#### createLegacyClient(keys, opts, cb(err, sbot))
+
+Connect to a client with some custom settings.
 
 opts supports the keys:
 
@@ -72,18 +76,12 @@ opts supports the keys:
 * `host, port, key` (legacy) if remote is not set, assemble address from host, port, key.
 * `manifest` use a custom manifest.
 
-it's recommended to use the `createClient` api instead, but this is still supported
-for legacy support.
-
-### require('ssb-client/client') => createClient
-
-#### createClient({keys, config, manifest, remote}, cb)
-
-connect to a specific server with fixed settings. All fields are mandatory.
-
+If you need custom options, it's recommended to use the `createCustomClient` API
+instead, but this is still provided for legacy support.
 
 
 ### keys
+
 See [ssb-keys](https://github.com/ssbc/ssb-keys). The keys look like this:
 ```js
 {
