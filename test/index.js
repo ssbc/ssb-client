@@ -86,3 +86,26 @@ tape('automatic manifest', function (t) {
     })
   })
 })
+
+
+tape('automatic manifest with promise support', function (t) {
+  const server = ssbServer({
+    port: 45451,
+    timeout: 2001,
+    temp: 'connect',
+    host: 'localhost',
+    master: keys.id,
+    keys: keys,
+    caps: { shs: shsCap }
+  })
+  server.on('multiserver:listening', () => {
+    ssbClient(keys, { port: 45451, caps: { shs: shsCap } }).then((client) => {
+      client.whoami().then((info) => {
+        t.equal(info.id, keys.id)
+        t.end()
+        client.close(true)
+        server.close(true)
+      })
+    })
+  })
+})

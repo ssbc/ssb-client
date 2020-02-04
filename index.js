@@ -43,11 +43,24 @@ module.exports = function (keys, opts, cb) {
   }
 
   var manifest = opts.manifest || null
-
-  createClient({
+  const options = {
     keys: keys,
     manifest: manifest,
     config: config,
     remote: remote
-  }, cb)
+  }
+
+  if (typeof cb === 'function') {
+    createClient(options, cb)
+  } else {
+    return new Promise((resolve, reject) => {
+      createClient(options, (err, val) => {
+	if (err) {
+	  reject(err)
+	} else {
+	  resolve(val)
+	}
+      })
+    })
+  }
 }
