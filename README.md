@@ -1,9 +1,12 @@
 # ssb-client v2
+Create an [rpc connection](https://ssbc.github.io/scuttlebutt-protocol-guide/#rpc-protocol) to an 
+*[sbot](https://github.com/ssbc/scuttlebot)* instance. Here are some resources that can help you 
+understand how it works in a practical way:
 
-Create an [rpc connection](https://ssbc.github.io/scuttlebutt-protocol-guide/#rpc-protocol) to an *[sbot](https://github.com/ssbc/scuttlebot)* instance. Here are some resources that can help you understand how it works in a practical way:
-
-* Tutorials using this library to create basic clients: [ssb-client-basic](https://github.com/mixmix/ssb-client-basic)
-* A simple command line wrapper around this library: [ssb-client-cli](https://github.com/qypea/ssb-client-cli)
+* Tutorials using this library to create basic clients: 
+[ssb-client-basic](https://github.com/mixmix/ssb-client-basic)
+* A simple command line wrapper around this library: 
+[ssb-client-cli](https://github.com/qypea/ssb-client-cli)
 
 ## Table of contents
 [Example](#example) | [Api](#api) | [License](#license)
@@ -29,20 +32,23 @@ ssbClient(keys, config, function (err, sbot, config) {
 # Api
 
 ## ssbClient(cb): async
-Makes things as "easy" as possible, by loading configuration and defaults. This is useful for scripts but applications should specify the configuration.
+Makes things as "easy" as possible, by loading configuration and defaults. This is useful for scripts 
+but applications should specify the configuration.
 
 ```js
 var ssbClient = require('ssb-client')
 ssbClient(function(err, sbot, config) {})
 ```
-Create a connection to the local `ssb-server` instance, using the default keys and configuration. This will be loaded from directory specified by `ssb_appname` (by default `~/.ssb`).
+Create a connection to the local `ssb-server` instance, using the default keys and configuration. This 
+will be loaded from directory specified by `ssb_appname` (by default `~/.ssb`).
 
 The manifest will be the manifest provided by that server.
 
 Calling this without arguments is handy for scripts, but applications should use the clearer apis.
 
 ## ssbClient({ keys, config, manifest, remote } | keys | config | cb): async
-There are several ways to call ssb-client. Many of them are shortcuts for advanced users and can generate some confusion.
+There are several ways to call ssb-client. Many of them are shortcuts for advanced users and can 
+generate some confusion.
 
 ```js
 var ssbClient = require('ssb-client')
@@ -88,14 +94,18 @@ You can use [`ssb-config`](https://github.com/ssbc/ssb-config) to generate a val
 
 No parameters are required except `config.caps.shs` if the call is `ssbClient(keys, config, cb)`.
 
-`config.caps.shs` is a random string passed to [secret-handshake](https://github.com/auditdrivencrypto/secret-handshake#example). It determines which sbot you are able to connect to.
+`config.caps.shs` is a random string passed to 
+[secret-handshake](https://github.com/auditdrivencrypto/secret-handshake#example). It determines which 
+sbot you are able to connect to.
 
-In all other cases the configuration used will be the result of merging the configuration declared and the one founded in the application directory (~/.ssb in most cases).
+In all other cases the configuration used will be the result of merging the configuration declared and 
+the one founded in the application directory (~/.ssb in most cases).
 
 If `config.manifest` is not defined, the manifest will be provided by the server.
 
 ### ssb_appname
-Declares where to look for further config, where to read and write databases. Stores data in ~/.${appName}, defaults to ssb (so data in ~/.ssb).
+Declares where to look for further config, where to read and write databases. Stores data in 
+~/.${appName}, defaults to ssb (so data in ~/.ssb).
 
 ## License
 
