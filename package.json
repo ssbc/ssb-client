@@ -14,6 +14,7 @@
     "explain-error": "^1.0.1",
     "multicb": "^1.2.1",
     "multiserver": "^3.1.2",
+    "multiserver-address": "^1.0.1",
     "muxrpc": "^6.5.0",
     "pull-hash": "^1.0.0",
     "pull-stream": "^3.6.0",
