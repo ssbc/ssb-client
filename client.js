@@ -5,6 +5,7 @@ var Onion       = require('multiserver/plugins/onion')
 var Shs         = require('multiserver/plugins/shs')
 var NoAuth      = require('multiserver/plugins/noauth')
 var UnixSock    = require('multiserver/plugins/unix-socket')
+const decodeAddress = require('multiserver-address').decode
 var explain     = require('explain-error')
 var muxrpc      = require('muxrpc')
 var pull        = require('pull-stream')
@@ -23,32 +24,10 @@ module.exports = function (opts, cb) {
   var config = opts.config
   var manifest = opts.manifest
 
-  var shs = Shs({
-    keys: toSodiumKeys(keys),
-    appKey: opts.config.caps.shs,
-
-    // no client auth. we can't receive connections anyway.
-    auth: function (cb) { cb(null, false) },
-    timeout: config.timers && config.timers.handshake || 3000
-  })
-
   // todo: refactor multiserver so that muxrpc is a transform.
   // then we can upgrade muxrpc's codec!
 
-  var noauth = NoAuth({
-    keys: toSodiumKeys(keys)
-  })
-
-  // I think it would be better to make these registerable plugins,
-  // that got connected up when you called. so they are not hard coded here.
-
-  var ms = MultiServer([
-    [Net({}), shs],
-    [Onion({}), shs],
-    [WS({}), shs],
-    [UnixSock({}), noauth],
-    [Net({}), noauth]
-  ])
+  const ms = makeMultiServer(opts, remote)
 
   ms.client(remote, function (err, stream) {
     if (err) {
@@ -97,4 +76,58 @@ module.exports = function (opts, cb) {
 
     pull(stream, sbot.stream, stream)
   })
+}
+
+function makeMultiServer(opts, remote) {
+  // find out what transports and protocols
+  // we actually need to connect to 'remote'
+  const addresses = decodeAddress(remote)
+  const requiredPlugins = {}
+  addresses.forEach(address=>{
+    address.forEach(({name})=> requiredPlugins[name] = true)
+  })
+
+  // make shs instance, if needed
+  const shs = requiredPlugins.shs && Shs({
+    keys: toSodiumKeys(opts.keys),
+    appKey: opts.config.caps.shs,
+
+    // no client auth. we can't receive connections anyway.
+    auth: function (cb) { cb(null, false) },
+    timeout: opts.config.timers && config.timers.handshake || 3000
+  })
+
+  // make noauth instance, if needed
+  const noauth = requiredPlugins.noauth && NoAuth({
+    keys: toSodiumKeys(opts.keys)
+  })
+
+  const stack = []
+  if (requiredPlugins.net && shs) {
+    stack.push(
+      [Net({}), shs]
+    )
+  }
+  if (requiredPlugins.onion && shs) {
+    stack.push(
+      [Onion({}), shs]
+    )
+  }
+  if (requiredPlugins.ws && shs) {
+    stack.push(
+      [WS({}), shs]
+    )
+  }
+  if (requiredPlugins.unix && noauth) {
+    stack.push(
+      [UnixSock({}), noauth]
+    )
+  }
+  if (requiredPlugins.net && noauth) {
+    stack.push(
+      [Net({}), noauth]
+    )
+  }
+
+  return MultiServer(stack)
 }
