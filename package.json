@@ -24,6 +24,9 @@
   "devDependencies": {
     "ssb-master": "^1.0.2",
     "ssb-server": "^14.1.2",
+    "ssb-onion": "^1.0.0",
+    "ssb-unix-socket": "^1.0.0",
+    "ssb-ws": "^6.2.3",
     "tape": "^4.2.0"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
